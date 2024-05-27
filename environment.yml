@@ -1,0 +1,5 @@
+name: fai3
+
+dependencies:
+  - python=3.11
+  - pip
