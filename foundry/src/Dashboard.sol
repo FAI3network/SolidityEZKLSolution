@@ -14,7 +14,7 @@ contract Dashboard is IDashboard {
     struct Inference {
         IVerifier verifier;
         uint256[] instances;
-        address owner;
+        address prover;
         bool checked;
     }
 
@@ -67,7 +67,7 @@ contract Dashboard is IDashboard {
         inferences[nullifier] = Inference({
             verifier: verifier,
             instances: instances,
-            owner: msg.sender,
+            prover: msg.sender,
             checked: false
         });
 
@@ -80,7 +80,7 @@ contract Dashboard is IDashboard {
      */
     function runFairness(bytes32 nullifier) external override {
         if (
-            (inferences[nullifier].owner != msg.sender) ||
+            (inferences[nullifier].prover != msg.sender) ||
             (inferences[nullifier].checked)
         ) {
             revert("Inference not found");
@@ -90,5 +90,15 @@ contract Dashboard is IDashboard {
         // metrics = runMetrics(inferences[nullifier].instances);
         // update model history with metrics
         // models[address(inferences[nullifier].verifier)].history.push(metrics);
+        // emit MetricsRun(address(inferences[nullifier].verifier));
+    }
+
+    /**
+     * @dev See {IDashboard-getModel}
+     */
+    function getModel(
+        address verifier
+    ) external view override returns (uint256 id, address owner) {
+        return (models[verifier].id, models[verifier].owner);
     }
 }

@@ -38,4 +38,14 @@ interface IDashboard {
      * @notice The inference must not have been checked before
      */
     function runFairness(bytes32 nullifier) external;
+
+    /**
+     * @dev Get the model information
+     * @param verifier verifier contract
+     * @return id model id
+     * @return owner model owner
+     */
+    function getModel(
+        address verifier
+    ) external view returns (uint256 id, address owner);
 }
