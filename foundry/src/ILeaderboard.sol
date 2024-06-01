@@ -5,7 +5,7 @@ import {IVerifier} from "./IVerifier.sol";
 
 interface ILeaderboard {
     /* Errors */
-    error ModelAlreadyRegistered();
+    error ModelAlreadyRegistered(uint256 modelId);
     error ModelNotRegistered();
     error InferenceAlreadyVerified();
     error InvalidProof();

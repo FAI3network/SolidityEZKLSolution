@@ -31,7 +31,7 @@ contract Leaderboard is ILeaderboard {
     /* Modifiers */
     modifier isNotRegistered(address verifier) {
         if (models[verifier].id != 0) {
-            revert ModelAlreadyRegistered();
+            revert ModelAlreadyRegistered(models[verifier].id);
         }
         _;
     }
@@ -130,8 +130,6 @@ contract Leaderboard is ILeaderboard {
         // run metrics
         uint256[] memory metrics = runMetrics(inference.instances);
 
-        // update model history with metrics
-        // models[address(inference.verifier)].history.push(metrics);
         emit MetricsRun(inference.modelId, metrics);
     }
 
