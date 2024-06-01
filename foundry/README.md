@@ -7,3 +7,8 @@
 to compile contracts: `forge build`
 
 to run tests: `forge test -vvv --ffi`
+
+1. usuario sube modelo, settings
+2. compilar, pk, vk
+3. pk + circuito + data => prueba
+4. vk => verifier

@@ -3,13 +3,24 @@ pragma solidity ^0.8.0;
 
 import {IVerifier} from "./IVerifier.sol";
 
-interface IDashboard {
-    event ModelRegistered(uint256 id, IVerifier verifier, address owner);
+interface ILeaderboard {
+    /* Errors */
+    error ModelAlreadyRegistered();
+    error ModelNotRegistered();
+    error InferenceAlreadyVerified();
+    error InvalidProof();
+    error NotProver();
+    error InferenceAlreadyChecked();
+
+    /* Events */
+    event ModelRegistered(uint256 modelId, IVerifier verifier, address owner);
     event InferenceVerified(
-        IVerifier verifier,
+        uint256 modelId,
         bytes proof,
-        uint256[] instances
+        uint256[] instances,
+        address prover
     );
+    event MetricsRun(uint256 modelId, uint256[] metrics);
 
     /**
      * @dev Register a new model
@@ -42,10 +53,10 @@ interface IDashboard {
     /**
      * @dev Get the model information
      * @param verifier verifier contract
-     * @return id model id
+     * @return modelId model id
      * @return owner model owner
      */
     function getModel(
         address verifier
-    ) external view returns (uint256 id, address owner);
+    ) external view returns (uint256 modelId, address owner);
 }

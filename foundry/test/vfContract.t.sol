@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "lib/forge-std/src/Test.sol";
-import {Halo2Verifier} from "../src/verifierContract.sol";
+import {Halo2Verifier} from "../src/Verifier.sol";
 
 contract vfContractTest is Test {
     Halo2Verifier public vf;
