@@ -6,11 +6,13 @@ import {Halo2Verifier} from "../src/Verifier.sol";
 import {Leaderboard} from "../src/Leaderboard.sol";
 import {IVerifier} from "../src/IVerifier.sol";
 import {ILeaderboard} from "../src/ILeaderboard.sol";
+import {Utils} from "./Utils.sol";
 
 contract leaderboardTest is Test {
     Halo2Verifier public haloVf;
     Leaderboard public lb;
     IVerifier public verifier;
+    Utils public utils;
 
     /* Errors */
     error ModelAlreadyRegistered();
@@ -40,6 +42,7 @@ contract leaderboardTest is Test {
         lb = new Leaderboard();
         haloVf = new Halo2Verifier();
         verifier = IVerifier(address(haloVf));
+        utils = new Utils();
         I_INST = [
             "0x0000000000000000000000000000000000000000000000000000000000000101",
             "0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effffe14",
@@ -75,39 +78,12 @@ contract leaderboardTest is Test {
 
     /* Test verifyInference */
 
-    function setParams(
-        string memory i_proof,
-        string[] memory inst
-    ) public returns (bytes memory proof, uint256[] memory instances) {
-        string[] memory input_proof = new string[](3);
-        input_proof[0] = "echo";
-        input_proof[1] = "-n";
-        input_proof[2] = i_proof;
-        proof = vm.ffi(input_proof);
-
-        instances = new uint256[](inst.length);
-        // inspiration: https://github.com/zkonduit/cryptoidol-contracts/blob/16d1741aa55aba5287ba46b136409d67d0b3da04/test/CryptoIdol.t.sol#L103
-        for (uint256 i = 0; i < inst.length; i++) {
-            string[] memory input_instance_i = new string[](3);
-            input_instance_i[0] = "echo";
-            input_instance_i[1] = "-n";
-            input_instance_i[2] = inst[i];
-
-            bytes memory res_instance_i = vm.ffi(input_instance_i);
-            // console.logBytes(res_instance_i);
-            uint256 instance_i = abi.decode(res_instance_i, (uint256));
-            instances[i] = instance_i; // instance i in uint256
-            // console.logUint(instances[i]);
-        }
-        return (proof, instances);
-    }
-
     function test_verifyInference() public {
         this.test_registerModel();
 
         bytes memory proof;
         uint256[] memory instances;
-        (proof, instances) = setParams(I_PROOF, I_INST); // set params
+        (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
 
         bytes32 nullifier = keccak256(
             abi.encodePacked(address(verifier), proof, instances)
@@ -124,7 +100,7 @@ contract leaderboardTest is Test {
     function test_modelNotRegistered() public {
         bytes memory proof;
         uint256[] memory instances;
-        (proof, instances) = setParams(I_PROOF, I_INST); // set params
+        (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
 
         vm.expectRevert(abi.encodeWithSelector(ModelNotRegistered.selector));
         lb.verifyInference(verifier, proof, instances); // verify inference
@@ -135,7 +111,7 @@ contract leaderboardTest is Test {
 
         bytes memory proof;
         uint256[] memory instances;
-        (proof, instances) = setParams(I_PROOF, I_INST); // set params
+        (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
 
         bytes32 nullifier = keccak256(
             abi.encodePacked(address(verifier), proof, instances)
@@ -152,13 +128,13 @@ contract leaderboardTest is Test {
 
         bytes memory proof;
         uint256[] memory instances;
-        (proof, instances) = setParams("0x", I_INST); // set params
+        (proof, instances) = utils.setParams("0x", I_INST); // set params
 
         vm.expectRevert();
         lb.verifyInference(verifier, proof, instances); // verify inference
 
         string[] memory str_instances;
-        (proof, instances) = setParams(I_PROOF, str_instances);
+        (proof, instances) = utils.setParams(I_PROOF, str_instances);
 
         vm.expectRevert();
         lb.verifyInference(verifier, proof, instances); // verify inference
