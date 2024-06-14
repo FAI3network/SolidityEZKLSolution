@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "lib/forge-std/src/Test.sol";
 import {Halo2Verifier} from "../../src/credit-unbias/VerifierCreditUnbias.sol";
-import {Utils} from "../utils.sol";
+import {Utils} from "../../utils/utils.sol";
 
 contract VfUnbiasContractTest is Test {
     Halo2Verifier public vf;

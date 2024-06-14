@@ -6,7 +6,7 @@ import {Halo2Verifier} from "../src/Verifier.sol";
 import {Leaderboard} from "../src/Leaderboard.sol";
 import {IVerifier} from "../src/IVerifier.sol";
 import {ILeaderboard} from "../src/ILeaderboard.sol";
-import {Utils} from "./Utils.sol";
+import {Utils} from "../utils/Utils.sol";
 
 contract leaderboardTest is Test {
     Halo2Verifier public haloVf;
