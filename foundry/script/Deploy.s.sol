@@ -7,44 +7,67 @@ import {Leaderboard} from "../src/Leaderboard.sol";
 import {Halo2Verifier as VerifierCreditBias} from "../src/credit-bias/VerifierCreditBias.sol";
 import {Halo2Verifier as VerifierCreditUnbias} from "../src/credit-unbias/VerifierCreditUnbias.sol";
 
-contract Deploy is Script {
-    address deployer;
-    address deployer2;
+contract DeployLeaderboard is Script {
     HelperConfig internal helperConfig;
     Leaderboard public leaderboard;
-    VerifierCreditBias public vfCBias;
-    VerifierCreditUnbias public vfCUnbias;
 
     function setUp() public {}
 
-    function run()
-        public
-        returns (Leaderboard, VerifierCreditBias, VerifierCreditUnbias)
-    {
+    function run() public returns (Leaderboard) {
         helperConfig = new HelperConfig();
-        (uint256 deployerKey, uint256 deployerKey2) = helperConfig
-            .activeNetworkConfig();
+        (uint256 deployerKey, ) = helperConfig.activeNetworkConfig();
+
         /* deploy leaderboard */
         vm.startBroadcast(deployerKey);
 
-        deployer = vm.addr(deployerKey);
-        console.log("Deployer: ", deployer);
+        console.log("Deployer: ", vm.addr(deployerKey));
 
         leaderboard = new Leaderboard();
 
         vm.stopBroadcast();
 
-        /* deploy verifiers */
+        return (leaderboard);
+    }
+}
+
+contract DeployVFCBias is Script {
+    HelperConfig internal helperConfig;
+    VerifierCreditBias vfCBias;
+
+    function run() public returns (VerifierCreditBias) {
+        helperConfig = new HelperConfig();
+        (, uint256 deployerKey2) = helperConfig.activeNetworkConfig();
+
+        /* deploy verifier credit bias */
         vm.startBroadcast(deployerKey2);
 
-        deployer2 = vm.addr(deployerKey2);
-        console.log("Deployer2: ", deployer2);
+        console.log("Deployer2: ", vm.addr(deployerKey2));
 
         vfCBias = new VerifierCreditBias();
+
+        vm.stopBroadcast();
+
+        return (vfCBias);
+    }
+}
+
+contract DeployVFCUnbias is Script {
+    HelperConfig internal helperConfig;
+    VerifierCreditUnbias vfCUnbias;
+
+    function run() public returns (VerifierCreditUnbias) {
+        helperConfig = new HelperConfig();
+        (, uint256 deployerKey2) = helperConfig.activeNetworkConfig();
+
+        /* deploy verifier credit unbias */
+        vm.startBroadcast(deployerKey2);
+
+        console.log("Deployer2: ", vm.addr(deployerKey2));
+
         vfCUnbias = new VerifierCreditUnbias();
 
         vm.stopBroadcast();
 
-        return (leaderboard, vfCBias, vfCUnbias);
+        return (vfCUnbias);
     }
 }

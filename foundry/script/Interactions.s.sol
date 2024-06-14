@@ -7,15 +7,14 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 import {Leaderboard} from "../src/Leaderboard.sol";
 import {Halo2Verifier as VerifierCreditBias} from "../src/credit-bias/VerifierCreditBias.sol";
 import {Halo2Verifier as VerifierCreditUnbias} from "../src/credit-unbias/VerifierCreditUnbias.sol";
-import {Deploy} from "./Deploy.s.sol";
 import {Utils} from "../utils/utils.sol";
+import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
 contract LeaderboardScript is Script {
     HelperConfig helperConfig;
     Leaderboard leaderboard;
     VerifierCreditBias vfCBias;
     VerifierCreditUnbias vfCUnbias;
-    Deploy deploy;
     Utils utils;
 
     string constant I_PROOF =
@@ -32,14 +31,23 @@ contract LeaderboardScript is Script {
     }
 
     function run() public {
+        /* get prover address */
         helperConfig = new HelperConfig();
         (, uint256 deployerKey2) = helperConfig.activeNetworkConfig();
-        deploy = new Deploy();
-        (leaderboard, vfCBias, vfCUnbias) = deploy.run();
 
+        /* get leaderboard */
+        address lb_address = DevOpsTools.get_most_recent_deployment(
+            "Leaderboard",
+            block.chainid
+        );
+        leaderboard = Leaderboard(lb_address);
+
+        /* interact with leaderboard */
         vm.startBroadcast(deployerKey2);
 
-        leaderboard.registerModel(IVerifier(address(vfCBias)));
+        vfCBias = new VerifierCreditBias(); // deploy verifier credit bias
+
+        leaderboard.registerModel(IVerifier(address(vfCBias))); // register verifier credit bias
 
         bytes memory proof;
         uint256[] memory instances;
@@ -49,7 +57,7 @@ contract LeaderboardScript is Script {
             IVerifier(address(vfCBias)),
             proof,
             instances
-        );
+        ); // verify inference
 
         leaderboard.runFairness(nullifier);
 

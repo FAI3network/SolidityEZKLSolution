@@ -12,3 +12,9 @@ to run tests: `forge test -vvv --ffi`
 2. compilar, pk, vk
 3. pk + circuito + data => prueba
 4. vk => verifier
+
+Run scripts:
+
+1. start anvil: `anvil`
+2. deploy leaderboard: `forge script "script/Deploy.s.sol:DeployLeaderboard" --fork-url "http://127.0.0.1:8545" --broadcast`
+3. interact with leaderboard: `forge script "script/Interactions.s.sol" --fork-url "http://127.0.0.1:8545" --broadcast`
