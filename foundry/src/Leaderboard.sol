@@ -50,6 +50,13 @@ contract Leaderboard is ILeaderboard {
         _;
     }
 
+    modifier inferenceExists(bytes32 nullifier) {
+        if (inferences[nullifier].prover == address(0)) {
+            revert InferenceNotExists();
+        }
+        _;
+    }
+
     modifier isProver(Inference memory inference, address prover) {
         if (inference.prover != prover) {
             revert NotProver();
@@ -122,11 +129,12 @@ contract Leaderboard is ILeaderboard {
     )
         external
         override
+        inferenceExists(nullifier)
         isProver(inferences[nullifier], msg.sender)
         isNotChecked(inferences[nullifier])
     {
+        inferences[nullifier].checked = true;
         Inference memory inference = inferences[nullifier];
-        inference.checked = true;
         // run metrics
         uint256[] memory metrics = runMetrics(inference.instances);
 

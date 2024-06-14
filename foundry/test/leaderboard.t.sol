@@ -21,6 +21,7 @@ contract leaderboardTest is Test {
     error InvalidProof();
     error NotProver();
     error InferenceAlreadyChecked();
+    error InferenceNotExists();
 
     /* Events */
     event ModelRegistered(uint256 modelId, IVerifier verifier, address owner);
@@ -78,7 +79,7 @@ contract leaderboardTest is Test {
 
     /* Test verifyInference */
 
-    function test_verifyInference() public {
+    function test_verifyInference() public returns (bytes32) {
         this.test_registerModel();
 
         bytes memory proof;
@@ -95,6 +96,7 @@ contract leaderboardTest is Test {
 
         console.logBytes32(nullifier);
         assertTrue(nullifier == res);
+        return nullifier;
     }
 
     function test_modelNotRegistered() public {
@@ -112,10 +114,6 @@ contract leaderboardTest is Test {
         bytes memory proof;
         uint256[] memory instances;
         (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
-
-        bytes32 nullifier = keccak256(
-            abi.encodePacked(address(verifier), proof, instances)
-        );
 
         vm.expectRevert(
             abi.encodeWithSelector(InferenceAlreadyVerified.selector)
@@ -138,5 +136,47 @@ contract leaderboardTest is Test {
 
         vm.expectRevert();
         lb.verifyInference(verifier, proof, instances); // verify inference
+    }
+
+    /* Test runFairness */
+    function test_runFairness() public returns (bytes32) {
+        bytes32 nullifier = this.test_verifyInference();
+        uint256[] memory metrics = new uint256[](3);
+        metrics[0] = uint256(1);
+        metrics[1] = uint256(1);
+        metrics[2] = uint256(1);
+        vm.expectEmit();
+        emit MetricsRun(1, metrics);
+        lb.runFairness(nullifier);
+
+        return nullifier;
+    }
+
+    function test_alreadyChecked() public {
+        bytes32 nullifier = this.test_runFairness();
+        vm.expectRevert(
+            abi.encodeWithSelector(InferenceAlreadyChecked.selector)
+        );
+        lb.runFairness(nullifier);
+    }
+
+    function test_isNotProver() public {
+        bytes32 nullifier = this.test_verifyInference();
+        vm.startPrank(makeAddr("random"));
+        vm.expectRevert(abi.encodeWithSelector(NotProver.selector));
+        lb.runFairness(nullifier);
+        vm.stopPrank();
+    }
+
+    function test_inferenceExists() public {
+        bytes memory proof;
+        uint256[] memory instances;
+        (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
+
+        bytes32 nullifier = keccak256(
+            abi.encodePacked(makeAddr("random"), proof, instances)
+        );
+        vm.expectRevert(abi.encodeWithSelector(InferenceNotExists.selector));
+        lb.runFairness(nullifier);
     }
 }

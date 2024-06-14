@@ -11,6 +11,7 @@ interface ILeaderboard {
     error InvalidProof();
     error NotProver();
     error InferenceAlreadyChecked();
+    error InferenceNotExists();
 
     /* Events */
     event ModelRegistered(uint256 modelId, IVerifier verifier, address owner);
