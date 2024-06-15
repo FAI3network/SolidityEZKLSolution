@@ -1,0 +1,28 @@
+type InferenceVerified @entity(immutable: true) {
+  id: ID!
+  modelId: BigInt! # uint256
+  proof: Bytes! # bytes
+  instances: [BigInt!]! # uint256[]
+  prover: Bytes! # address
+}
+
+type MetricsRun @entity(immutable: true) {
+  id: ID!
+  modelId: BigInt! # uint256
+  metrics: [BigInt!]! # uint256[]
+  nullifier: Bytes! # bytes32
+}
+
+type ModelDeleted @entity(immutable: true) {
+  id: ID!
+  modelId: BigInt! # uint256
+  verifier: Bytes! # address
+  owner: Bytes! # address
+}
+
+type ModelRegistered @entity(immutable: true) {
+  id: ID!
+  modelId: BigInt! # uint256
+  verifier: Bytes! # address
+  owner: Bytes! # address
+}

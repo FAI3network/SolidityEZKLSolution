@@ -1,0 +1,226 @@
+[
+  { "type": "constructor", "inputs": [], "stateMutability": "nonpayable" },
+  {
+    "type": "function",
+    "name": "deleteModel",
+    "inputs": [
+      {
+        "name": "verifier",
+        "type": "address",
+        "internalType": "contract IVerifier"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getInference",
+    "inputs": [
+      { "name": "nullifier", "type": "bytes32", "internalType": "bytes32" }
+    ],
+    "outputs": [
+      { "name": "modelId", "type": "uint256", "internalType": "uint256" },
+      { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" },
+      { "name": "prover", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getModel",
+    "inputs": [
+      { "name": "verifier", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [
+      { "name": "id", "type": "uint256", "internalType": "uint256" },
+      { "name": "owner", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "inferences",
+    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [
+      { "name": "modelId", "type": "uint256", "internalType": "uint256" },
+      { "name": "prover", "type": "address", "internalType": "address" },
+      { "name": "checked", "type": "bool", "internalType": "bool" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "models",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [
+      { "name": "id", "type": "uint256", "internalType": "uint256" },
+      { "name": "owner", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "registerModel",
+    "inputs": [
+      {
+        "name": "verifier",
+        "type": "address",
+        "internalType": "contract IVerifier"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "runFairness",
+    "inputs": [
+      { "name": "nullifier", "type": "bytes32", "internalType": "bytes32" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "s_modelCounter",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "verifyInference",
+    "inputs": [
+      {
+        "name": "verifier",
+        "type": "address",
+        "internalType": "contract IVerifier"
+      },
+      { "name": "proof", "type": "bytes", "internalType": "bytes" },
+      { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" }
+    ],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "InferenceVerified",
+    "inputs": [
+      {
+        "name": "modelId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "proof",
+        "type": "bytes",
+        "indexed": true,
+        "internalType": "bytes"
+      },
+      {
+        "name": "instances",
+        "type": "uint256[]",
+        "indexed": false,
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "prover",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MetricsRun",
+    "inputs": [
+      {
+        "name": "modelId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "metrics",
+        "type": "uint256[]",
+        "indexed": true,
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "nullifier",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ModelDeleted",
+    "inputs": [
+      {
+        "name": "modelId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "verifier",
+        "type": "address",
+        "indexed": true,
+        "internalType": "contract IVerifier"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ModelRegistered",
+    "inputs": [
+      {
+        "name": "modelId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "verifier",
+        "type": "address",
+        "indexed": true,
+        "internalType": "contract IVerifier"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  { "type": "error", "name": "InferenceAlreadyChecked", "inputs": [] },
+  { "type": "error", "name": "InferenceAlreadyVerified", "inputs": [] },
+  { "type": "error", "name": "InferenceNotExists", "inputs": [] },
+  { "type": "error", "name": "InvalidProof", "inputs": [] },
+  {
+    "type": "error",
+    "name": "ModelAlreadyRegistered",
+    "inputs": [
+      { "name": "modelId", "type": "uint256", "internalType": "uint256" }
+    ]
+  },
+  { "type": "error", "name": "ModelNotRegistered", "inputs": [] },
+  { "type": "error", "name": "NotOwner", "inputs": [] },
+  { "type": "error", "name": "NotProver", "inputs": [] }
+]
