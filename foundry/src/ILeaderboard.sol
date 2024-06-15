@@ -10,11 +10,17 @@ interface ILeaderboard {
     error InferenceAlreadyVerified();
     error InvalidProof();
     error NotProver();
+    error NotOwner();
     error InferenceAlreadyChecked();
     error InferenceNotExists();
 
     /* Events */
     event ModelRegistered(
+        uint256 indexed modelId,
+        IVerifier indexed verifier,
+        address indexed owner
+    );
+    event ModelDeleted(
         uint256 indexed modelId,
         IVerifier indexed verifier,
         address indexed owner
@@ -37,6 +43,12 @@ interface ILeaderboard {
      * @dev Emits a {ModelRegistered} event
      */
     function registerModel(IVerifier verifier) external;
+
+    /**
+     * @dev Delete a model
+     * @param verifier verifier contract
+     */
+    function deleteModel(IVerifier verifier) external;
 
     /**
      * @dev Verify an inference
@@ -68,4 +80,18 @@ interface ILeaderboard {
     function getModel(
         address verifier
     ) external view returns (uint256 modelId, address owner);
+
+    /**
+     * @dev Get the inference information
+     * @param nullifier nullifier of the inference
+     * @return modelId model id
+     * @return instances output instances
+     * @return prover prover of the inference
+     */
+    function getInference(
+        bytes32 nullifier
+    )
+        external
+        view
+        returns (uint256 modelId, uint256[] memory instances, address prover);
 }

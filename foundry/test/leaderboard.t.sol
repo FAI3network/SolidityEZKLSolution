@@ -20,11 +20,17 @@ contract leaderboardTest is Test {
     error InferenceAlreadyVerified();
     error InvalidProof();
     error NotProver();
+    error NotOwner();
     error InferenceAlreadyChecked();
     error InferenceNotExists();
 
     /* Events */
     event ModelRegistered(
+        uint256 indexed modelId,
+        IVerifier indexed verifier,
+        address indexed owner
+    );
+    event ModelDeleted(
         uint256 indexed modelId,
         IVerifier indexed verifier,
         address indexed owner
@@ -85,6 +91,30 @@ contract leaderboardTest is Test {
         lb.registerModel(verifier);
     }
 
+    /* Test deleteModel */
+    function test_deleteModel() public {
+        this.test_registerModel();
+        vm.expectEmit();
+        emit ModelDeleted(1, verifier, address(this));
+        lb.deleteModel(verifier);
+        (uint256 id, address owner) = lb.getModel(address(verifier));
+        assertTrue(id == uint256(0));
+        assertTrue(owner == address(0));
+    }
+
+    function test_deleteModelNotRegistered() public {
+        vm.expectRevert(abi.encodeWithSelector(ModelNotRegistered.selector));
+        lb.deleteModel(verifier);
+    }
+
+    function test_isNotOwner() public {
+        this.test_registerModel();
+        vm.startPrank(makeAddr("random"));
+        vm.expectRevert(abi.encodeWithSelector(NotOwner.selector));
+        lb.deleteModel(verifier);
+        vm.stopPrank();
+    }
+
     /* Test verifyInference */
 
     function test_verifyInference() public returns (bytes32) {
@@ -107,7 +137,7 @@ contract leaderboardTest is Test {
         return nullifier;
     }
 
-    function test_modelNotRegistered() public {
+    function test_verifyModelNotRegistered() public {
         bytes memory proof;
         uint256[] memory instances;
         (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params

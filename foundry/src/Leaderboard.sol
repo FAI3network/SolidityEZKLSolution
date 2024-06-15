@@ -29,41 +29,55 @@ contract Leaderboard is ILeaderboard {
 
     /* Modifiers */
     modifier isNotRegistered(address verifier) {
-        if (models[verifier].id != 0) {
+        Model memory model = models[verifier];
+        if (model.owner != address(0)) {
             revert ModelAlreadyRegistered(models[verifier].id);
         }
         _;
     }
 
     modifier isRegistered(address verifier) {
-        if (models[verifier].owner == address(0)) {
+        Model memory model = models[verifier];
+        if (model.owner == address(0)) {
             revert ModelNotRegistered();
         }
         _;
     }
 
+    modifier isOwner(address verifier) {
+        Model memory model = models[verifier];
+        if (model.owner != msg.sender) {
+            revert NotOwner();
+        }
+        _;
+    }
+
     modifier isNotVerified(bytes32 nullifier) {
-        if (inferences[nullifier].prover != address(0)) {
+        Inference memory inference = inferences[nullifier];
+        if (inference.prover != address(0)) {
             revert InferenceAlreadyVerified();
         }
         _;
     }
 
     modifier inferenceExists(bytes32 nullifier) {
-        if (inferences[nullifier].prover == address(0)) {
+        Inference memory inference = inferences[nullifier];
+        if (inference.prover == address(0)) {
             revert InferenceNotExists();
         }
         _;
     }
 
-    modifier isProver(Inference memory inference, address prover) {
+    modifier isProver(bytes32 nullifier, address prover) {
+        Inference memory inference = inferences[nullifier];
         if (inference.prover != prover) {
             revert NotProver();
         }
         _;
     }
 
-    modifier isNotChecked(Inference memory inference) {
+    modifier isNotChecked(bytes32 nullifier) {
+        Inference memory inference = inferences[nullifier];
         if (inference.checked) {
             revert InferenceAlreadyChecked();
         }
@@ -82,6 +96,22 @@ contract Leaderboard is ILeaderboard {
             owner: msg.sender
         });
         emit ModelRegistered(s_modelCounter, verifier, msg.sender);
+    }
+
+    /**
+     * @dev See {ILeaderboard-deleteModel}
+     */
+    function deleteModel(
+        IVerifier verifier
+    )
+        external
+        override
+        isRegistered(address(verifier))
+        isOwner(address(verifier))
+    {
+        uint256 modelId = models[address(verifier)].id;
+        delete models[address(verifier)];
+        emit ModelDeleted(modelId, verifier, msg.sender);
     }
 
     /**
@@ -128,8 +158,8 @@ contract Leaderboard is ILeaderboard {
         external
         override
         inferenceExists(nullifier)
-        isProver(inferences[nullifier], msg.sender)
-        isNotChecked(inferences[nullifier])
+        isProver(nullifier, msg.sender)
+        isNotChecked(nullifier)
     {
         inferences[nullifier].checked = true;
         Inference memory inference = inferences[nullifier];
@@ -161,5 +191,20 @@ contract Leaderboard is ILeaderboard {
         address verifier
     ) external view override returns (uint256 id, address owner) {
         return (models[verifier].id, models[verifier].owner);
+    }
+
+    /**
+     * @dev See {ILeaderboard-getInference}
+     */
+    function getInference(
+        bytes32 nullifier
+    )
+        external
+        view
+        override
+        returns (uint256 modelId, uint256[] memory instances, address prover)
+    {
+        Inference memory inference = inferences[nullifier];
+        return (inference.modelId, inference.instances, inference.prover);
     }
 }
