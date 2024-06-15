@@ -14,14 +14,22 @@ interface ILeaderboard {
     error InferenceNotExists();
 
     /* Events */
-    event ModelRegistered(uint256 modelId, IVerifier verifier, address owner);
-    event InferenceVerified(
-        uint256 modelId,
-        bytes proof,
-        uint256[] instances,
-        address prover
+    event ModelRegistered(
+        uint256 indexed modelId,
+        IVerifier indexed verifier,
+        address indexed owner
     );
-    event MetricsRun(uint256 modelId, uint256[] metrics);
+    event InferenceVerified(
+        uint256 indexed modelId,
+        bytes indexed proof,
+        uint256[] instances,
+        address indexed prover
+    );
+    event MetricsRun(
+        uint256 indexed modelId,
+        uint256[] indexed metrics,
+        bytes32 indexed nullifier
+    );
 
     /**
      * @dev Register a new model

@@ -7,7 +7,6 @@ import {ILeaderboard} from "./ILeaderboard.sol";
 contract Leaderboard is ILeaderboard {
     struct Model {
         uint256 id;
-        IVerifier verifier;
         address owner;
     }
     struct Inference {
@@ -37,7 +36,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isRegistered(address verifier) {
-        if (models[verifier].verifier == IVerifier(address(0))) {
+        if (models[verifier].owner == address(0)) {
             revert ModelNotRegistered();
         }
         _;
@@ -80,7 +79,6 @@ contract Leaderboard is ILeaderboard {
         s_modelCounter++;
         models[address(verifier)] = Model({
             id: s_modelCounter,
-            verifier: verifier,
             owner: msg.sender
         });
         emit ModelRegistered(s_modelCounter, verifier, msg.sender);
@@ -138,7 +136,7 @@ contract Leaderboard is ILeaderboard {
         // run metrics
         uint256[] memory metrics = runMetrics(inference.instances);
 
-        emit MetricsRun(inference.modelId, metrics);
+        emit MetricsRun(inference.modelId, metrics, nullifier);
     }
 
     /**

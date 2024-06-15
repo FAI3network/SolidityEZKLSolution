@@ -24,14 +24,22 @@ contract leaderboardTest is Test {
     error InferenceNotExists();
 
     /* Events */
-    event ModelRegistered(uint256 modelId, IVerifier verifier, address owner);
-    event InferenceVerified(
-        uint256 modelId,
-        bytes proof,
-        uint256[] instances,
-        address prover
+    event ModelRegistered(
+        uint256 indexed modelId,
+        IVerifier indexed verifier,
+        address indexed owner
     );
-    event MetricsRun(uint256 modelId, uint256[] metrics);
+    event InferenceVerified(
+        uint256 indexed modelId,
+        bytes indexed proof,
+        uint256[] instances,
+        address indexed prover
+    );
+    event MetricsRun(
+        uint256 indexed modelId,
+        uint256[] indexed metrics,
+        bytes32 indexed nullifier
+    );
 
     /* Constants */
     string constant I_PROOF =
@@ -146,7 +154,7 @@ contract leaderboardTest is Test {
         metrics[1] = uint256(1);
         metrics[2] = uint256(1);
         vm.expectEmit();
-        emit MetricsRun(1, metrics);
+        emit MetricsRun(1, metrics, nullifier);
         lb.runFairness(nullifier);
 
         return nullifier;
