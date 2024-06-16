@@ -25,25 +25,17 @@ contract leaderboardTest is Test {
     error InferenceNotExists();
 
     /* Events */
-    event ModelRegistered(
-        uint256 indexed modelId,
-        IVerifier indexed verifier,
-        address indexed owner
-    );
-    event ModelDeleted(
-        uint256 indexed modelId,
-        IVerifier indexed verifier,
-        address indexed owner
-    );
+    event ModelRegistered(IVerifier indexed verifier, address indexed owner);
+    event ModelDeleted(IVerifier indexed verifier, address indexed owner);
     event InferenceVerified(
-        uint256 indexed modelId,
+        IVerifier indexed verifier,
         bytes indexed proof,
         uint256[] instances,
         address indexed prover
     );
     event MetricsRun(
-        uint256 indexed modelId,
-        uint256[] indexed metrics,
+        IVerifier indexed verifier,
+        uint256[] metrics,
         bytes32 indexed nullifier
     );
 
@@ -75,18 +67,17 @@ contract leaderboardTest is Test {
     /* Test registerModel */
     function test_registerModel() public {
         vm.expectEmit();
-        emit ModelRegistered(1, verifier, address(this));
+        emit ModelRegistered(verifier, address(this));
         lb.registerModel(verifier);
-        (uint256 id, address owner) = lb.getModel(address(verifier));
-        assertTrue(id == 1);
+        address owner = lb.getModel(address(verifier));
         assertTrue(owner == address(this));
     }
 
     function test_alreadyRegistered() public {
         lb.registerModel(verifier);
-        (uint256 modelId, ) = lb.getModel(address(verifier));
+
         vm.expectRevert(
-            abi.encodeWithSignature("ModelAlreadyRegistered(uint256)", modelId)
+            abi.encodeWithSelector(ModelAlreadyRegistered.selector)
         );
         lb.registerModel(verifier);
     }
@@ -95,10 +86,9 @@ contract leaderboardTest is Test {
     function test_deleteModel() public {
         this.test_registerModel();
         vm.expectEmit();
-        emit ModelDeleted(1, verifier, address(this));
+        emit ModelDeleted(verifier, address(this));
         lb.deleteModel(verifier);
-        (uint256 id, address owner) = lb.getModel(address(verifier));
-        assertTrue(id == uint256(0));
+        address owner = lb.getModel(address(verifier));
         assertTrue(owner == address(0));
     }
 
@@ -129,7 +119,7 @@ contract leaderboardTest is Test {
         );
 
         vm.expectEmit();
-        emit InferenceVerified(1, proof, instances, address(this));
+        emit InferenceVerified(verifier, proof, instances, address(this));
         bytes32 res = lb.verifyInference(verifier, proof, instances); // verify inference
 
         console.logBytes32(nullifier);
@@ -184,7 +174,7 @@ contract leaderboardTest is Test {
         metrics[1] = uint256(1);
         metrics[2] = uint256(1);
         vm.expectEmit();
-        emit MetricsRun(1, metrics, nullifier);
+        emit MetricsRun(verifier, metrics, nullifier);
         lb.runFairness(nullifier);
 
         return nullifier;

@@ -5,7 +5,7 @@ import {IVerifier} from "./IVerifier.sol";
 
 interface ILeaderboard {
     /* Errors */
-    error ModelAlreadyRegistered(uint256 modelId);
+    error ModelAlreadyRegistered();
     error ModelNotRegistered();
     error InferenceAlreadyVerified();
     error InvalidProof();
@@ -15,25 +15,17 @@ interface ILeaderboard {
     error InferenceNotExists();
 
     /* Events */
-    event ModelRegistered(
-        uint256 indexed modelId,
-        IVerifier indexed verifier,
-        address indexed owner
-    );
-    event ModelDeleted(
-        uint256 indexed modelId,
-        IVerifier indexed verifier,
-        address indexed owner
-    );
+    event ModelRegistered(IVerifier indexed verifier, address indexed owner);
+    event ModelDeleted(IVerifier indexed verifier, address indexed owner);
     event InferenceVerified(
-        uint256 indexed modelId,
+        IVerifier indexed verifier,
         bytes indexed proof,
         uint256[] instances,
         address indexed prover
     );
     event MetricsRun(
-        uint256 indexed modelId,
-        uint256[] indexed metrics,
+        IVerifier indexed verifier,
+        uint256[] metrics,
         bytes32 indexed nullifier
     );
 
@@ -73,18 +65,15 @@ interface ILeaderboard {
 
     /**
      * @dev Get the model information
-     * @param verifier verifier contract
-     * @return modelId model id
+     * @param verifier address of verifier contract
      * @return owner model owner
      */
-    function getModel(
-        address verifier
-    ) external view returns (uint256 modelId, address owner);
+    function getModel(address verifier) external view returns (address owner);
 
     /**
      * @dev Get the inference information
      * @param nullifier nullifier of the inference
-     * @return modelId model id
+     * @return verifier contract verifier of the inference
      * @return instances output instances
      * @return prover prover of the inference
      */
@@ -93,5 +82,9 @@ interface ILeaderboard {
     )
         external
         view
-        returns (uint256 modelId, uint256[] memory instances, address prover);
+        returns (
+            IVerifier verifier,
+            uint256[] memory instances,
+            address prover
+        );
 }
