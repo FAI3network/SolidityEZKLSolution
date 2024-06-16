@@ -1,5 +1,5 @@
 import { newMockEvent } from "matchstick-as"
-import { ethereum, BigInt, Bytes, Address } from "@graphprotocol/graph-ts"
+import { ethereum, Address, Bytes, BigInt } from "@graphprotocol/graph-ts"
 import {
   InferenceVerified,
   MetricsRun,
@@ -8,7 +8,7 @@ import {
 } from "../generated/Leaderboard/Leaderboard"
 
 export function createInferenceVerifiedEvent(
-  modelId: BigInt,
+  verifier: Address,
   proof: Bytes,
   instances: Array<BigInt>,
   prover: Address
@@ -18,10 +18,7 @@ export function createInferenceVerifiedEvent(
   inferenceVerifiedEvent.parameters = new Array()
 
   inferenceVerifiedEvent.parameters.push(
-    new ethereum.EventParam(
-      "modelId",
-      ethereum.Value.fromUnsignedBigInt(modelId)
-    )
+    new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
   )
   inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam("proof", ethereum.Value.fromBytes(proof))
@@ -40,7 +37,7 @@ export function createInferenceVerifiedEvent(
 }
 
 export function createMetricsRunEvent(
-  modelId: BigInt,
+  verifier: Address,
   metrics: Array<BigInt>,
   nullifier: Bytes
 ): MetricsRun {
@@ -49,10 +46,7 @@ export function createMetricsRunEvent(
   metricsRunEvent.parameters = new Array()
 
   metricsRunEvent.parameters.push(
-    new ethereum.EventParam(
-      "modelId",
-      ethereum.Value.fromUnsignedBigInt(modelId)
-    )
+    new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
   )
   metricsRunEvent.parameters.push(
     new ethereum.EventParam(
@@ -71,7 +65,6 @@ export function createMetricsRunEvent(
 }
 
 export function createModelDeletedEvent(
-  modelId: BigInt,
   verifier: Address,
   owner: Address
 ): ModelDeleted {
@@ -79,12 +72,6 @@ export function createModelDeletedEvent(
 
   modelDeletedEvent.parameters = new Array()
 
-  modelDeletedEvent.parameters.push(
-    new ethereum.EventParam(
-      "modelId",
-      ethereum.Value.fromUnsignedBigInt(modelId)
-    )
-  )
   modelDeletedEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
   )
@@ -96,7 +83,6 @@ export function createModelDeletedEvent(
 }
 
 export function createModelRegisteredEvent(
-  modelId: BigInt,
   verifier: Address,
   owner: Address
 ): ModelRegistered {
@@ -104,12 +90,6 @@ export function createModelRegisteredEvent(
 
   modelRegisteredEvent.parameters = new Array()
 
-  modelRegisteredEvent.parameters.push(
-    new ethereum.EventParam(
-      "modelId",
-      ethereum.Value.fromUnsignedBigInt(modelId)
-    )
-  )
   modelRegisteredEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
   )

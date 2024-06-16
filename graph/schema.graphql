@@ -1,6 +1,6 @@
 type InferenceVerified @entity(immutable: true) {
   id: ID!
-  modelId: BigInt! # uint256
+  verifier: Bytes! # address
   proof: Bytes! # bytes
   instances: [BigInt!]! # uint256[]
   prover: Bytes! # address
@@ -8,21 +8,21 @@ type InferenceVerified @entity(immutable: true) {
 
 type MetricsRun @entity(immutable: true) {
   id: ID!
-  modelId: BigInt! # uint256
+  verifier: Bytes! # address
   metrics: [BigInt!]! # uint256[]
   nullifier: Bytes! # bytes32
 }
 
 type ModelDeleted @entity(immutable: true) {
   id: ID!
-  modelId: BigInt! # uint256
   verifier: Bytes! # address
   owner: Bytes! # address
 }
 
 type ModelRegistered @entity(immutable: true) {
   id: ID!
-  modelId: BigInt! # uint256
   verifier: Bytes! # address
   owner: Bytes! # address
+  numberOfInferences: Int
+  avgMetrics: [BigDecimal!]
 }

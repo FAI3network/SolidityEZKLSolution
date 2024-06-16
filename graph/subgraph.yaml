@@ -8,9 +8,9 @@ dataSources:
     name: Leaderboard
     network: sepolia
     source:
-      address: "0x5686324309765b460CB413561d601DF7C48C856d"
+      address: "0xD57fa8ACb457Ce0E9E89452401aD000525559Ee5"
       abi: Leaderboard
-      startBlock: 6115672
+      startBlock: 6122423
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -24,12 +24,12 @@ dataSources:
         - name: Leaderboard
           file: ./abis/Leaderboard.json
       eventHandlers:
-        - event: InferenceVerified(indexed uint256,indexed bytes,uint256[],indexed address)
+        - event: InferenceVerified(indexed address,indexed bytes,uint256[],indexed address)
           handler: handleInferenceVerified
-        - event: MetricsRun(indexed uint256,indexed uint256[],indexed bytes32)
+        - event: MetricsRun(indexed address,uint256[],indexed bytes32)
           handler: handleMetricsRun
-        - event: ModelDeleted(indexed uint256,indexed address,indexed address)
+        - event: ModelDeleted(indexed address,indexed address)
           handler: handleModelDeleted
-        - event: ModelRegistered(indexed uint256,indexed address,indexed address)
+        - event: ModelRegistered(indexed address,indexed address)
           handler: handleModelRegistered
       file: ./src/leaderboard.ts

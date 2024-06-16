@@ -10,7 +10,7 @@ import {Halo2Verifier as VerifierCreditUnbias} from "../src/credit-unbias/Verifi
 import {Utils} from "../utils/utils.sol";
 import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
-contract LeaderboardScript is Script {
+contract Interactions is Script {
     HelperConfig helperConfig;
     Leaderboard leaderboard;
     VerifierCreditBias vfCBias;
@@ -42,6 +42,7 @@ contract LeaderboardScript is Script {
             "Leaderboard",
             block.chainid
         );
+        console.log(lb_address);
         leaderboard = Leaderboard(lb_address);
 
         /* interact with leaderboard */

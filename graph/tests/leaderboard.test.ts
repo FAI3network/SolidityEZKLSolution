@@ -6,7 +6,7 @@ import {
   beforeAll,
   afterAll
 } from "matchstick-as/assembly/index"
-import { BigInt, Bytes, Address } from "@graphprotocol/graph-ts"
+import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts"
 import { InferenceVerified } from "../generated/schema"
 import { InferenceVerified as InferenceVerifiedEvent } from "../generated/Leaderboard/Leaderboard"
 import { handleInferenceVerified } from "../src/leaderboard"
@@ -17,14 +17,16 @@ import { createInferenceVerifiedEvent } from "./leaderboard-utils"
 
 describe("Describe entity assertions", () => {
   beforeAll(() => {
-    let modelId = BigInt.fromI32(234)
+    let verifier = Address.fromString(
+      "0x0000000000000000000000000000000000000001"
+    )
     let proof = Bytes.fromI32(1234567890)
     let instances = [BigInt.fromI32(234)]
     let prover = Address.fromString(
       "0x0000000000000000000000000000000000000001"
     )
     let newInferenceVerifiedEvent = createInferenceVerifiedEvent(
-      modelId,
+      verifier,
       proof,
       instances,
       prover
@@ -46,8 +48,8 @@ describe("Describe entity assertions", () => {
     assert.fieldEquals(
       "InferenceVerified",
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "modelId",
-      "234"
+      "verifier",
+      "0x0000000000000000000000000000000000000001"
     )
     assert.fieldEquals(
       "InferenceVerified",

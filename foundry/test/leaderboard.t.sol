@@ -23,6 +23,7 @@ contract leaderboardTest is Test {
     error NotOwner();
     error InferenceAlreadyChecked();
     error InferenceNotExists();
+    error URINotProvided();
 
     /* Events */
     event ModelRegistered(IVerifier indexed verifier, address indexed owner);
@@ -79,6 +80,7 @@ contract leaderboardTest is Test {
             keccak256(abi.encodePacked(modelURI)) ==
                 keccak256(abi.encodePacked(MODEL_URI))
         );
+        assertTrue(bytes(modelURI).length > 0);
     }
 
     function test_alreadyRegistered() public {
@@ -88,6 +90,11 @@ contract leaderboardTest is Test {
             abi.encodeWithSelector(ModelAlreadyRegistered.selector)
         );
         lb.registerModel(verifier, MODEL_URI);
+    }
+
+    function test_uriNotProvided() public {
+        vm.expectRevert(abi.encodeWithSelector(URINotProvided.selector));
+        lb.registerModel(verifier, "");
     }
 
     /* Test deleteModel */
