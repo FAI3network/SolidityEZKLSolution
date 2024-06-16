@@ -13,6 +13,7 @@ interface ILeaderboard {
     error NotOwner();
     error InferenceAlreadyChecked();
     error InferenceNotExists();
+    error URINotProvided();
 
     /* Events */
     event ModelRegistered(IVerifier indexed verifier, address indexed owner);
@@ -34,7 +35,7 @@ interface ILeaderboard {
      * @param verifier: verifier contract, used as identifier for the model
      * @dev Emits a {ModelRegistered} event
      */
-    function registerModel(IVerifier verifier) external;
+    function registerModel(IVerifier verifier, string memory) external;
 
     /**
      * @dev Delete a model
@@ -67,8 +68,11 @@ interface ILeaderboard {
      * @dev Get the model information
      * @param verifier address of verifier contract
      * @return owner model owner
+     * @return modelURI model URI
      */
-    function getModel(address verifier) external view returns (address owner);
+    function getModel(
+        address verifier
+    ) external view returns (address owner, string memory modelURI);
 
     /**
      * @dev Get the inference information

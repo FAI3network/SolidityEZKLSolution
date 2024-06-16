@@ -7,6 +7,7 @@ import {ILeaderboard} from "./ILeaderboard.sol";
 contract Leaderboard is ILeaderboard {
     struct Model {
         address owner;
+        string modelURI;
     }
     struct Inference {
         IVerifier verifier;
@@ -83,9 +84,16 @@ contract Leaderboard is ILeaderboard {
      * @dev See {ILeaderboard-registerModel}
      */
     function registerModel(
-        IVerifier verifier
+        IVerifier verifier,
+        string memory modelURI
     ) external override isNotRegistered(address(verifier)) {
-        models[address(verifier)] = Model({owner: msg.sender});
+        if (bytes(modelURI).length == 0) {
+            revert URINotProvided();
+        }
+        models[address(verifier)] = Model({
+            owner: msg.sender,
+            modelURI: modelURI
+        });
         emit ModelRegistered(verifier, msg.sender);
     }
 
@@ -178,9 +186,9 @@ contract Leaderboard is ILeaderboard {
      */
     function getModel(
         address verifier
-    ) external view override returns (address owner) {
+    ) external view override returns (address owner, string memory modelURI) {
         Model memory model = models[verifier];
-        return (model.owner);
+        return (model.owner, model.modelURI);
     }
 
     /**
