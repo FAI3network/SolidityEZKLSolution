@@ -1,76 +1,187 @@
+import { Address, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
 import {
+  afterAll,
   assert,
+  beforeAll,
+  clearStore,
   describe,
   test,
-  clearStore,
-  beforeAll,
-  afterAll
-} from "matchstick-as/assembly/index"
-import { Address, Bytes, BigInt } from "@graphprotocol/graph-ts"
-import { InferenceVerified } from "../generated/schema"
-import { InferenceVerified as InferenceVerifiedEvent } from "../generated/Leaderboard/Leaderboard"
-import { handleInferenceVerified } from "../src/leaderboard"
-import { createInferenceVerifiedEvent } from "./leaderboard-utils"
+} from "matchstick-as";
+import {
+  createInferenceVerifiedEvent,
+  createMetricsRunEvent,
+  createModelRegisteredEvent,
+} from "./leaderboard-utils";
+import {
+  handleInferenceVerified,
+  handleMetricsRun,
+  handleModelRegistered,
+} from "../src/leaderboard";
+import {
+  InferenceVerified,
+  MetricsRun,
+  ModelDeleted,
+  ModelRegistered,
+} from "../generated/schema";
 
-// Tests structure (matchstick-as >=0.5.0)
-// https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
-
-describe("Describe entity assertions", () => {
-  beforeAll(() => {
+test(
+  "Model Registered Event should be handled correctly",
+  () => {
+    // create a new model registered event
     let verifier = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let proof = Bytes.fromI32(1234567890)
-    let instances = [BigInt.fromI32(234)]
-    let prover = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let newInferenceVerifiedEvent = createInferenceVerifiedEvent(
+      "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let owner = Address.fromString(
+      "0x99995A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let newModelRegisteredEvent = createModelRegisteredEvent(verifier, owner);
+    handleModelRegistered(newModelRegisteredEvent);
+    assert.bytesEquals(
+      newModelRegisteredEvent.params.verifier,
       verifier,
-      proof,
-      instances,
-      prover
-    )
-    handleInferenceVerified(newInferenceVerifiedEvent)
-  })
+      "Verifier should be the same"
+    );
+    assert.bytesEquals(
+      newModelRegisteredEvent.params.owner,
+      owner,
+      "Owner should be the same"
+    );
+  },
+  false
+);
 
+describe("Inference Verified Event", () => {
   afterAll(() => {
-    clearStore()
-  })
+    clearStore();
+  });
 
   // For more test scenarios, see:
   // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
 
   test("InferenceVerified created and stored", () => {
-    assert.entityCount("InferenceVerified", 1)
-
-    // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
-    assert.fieldEquals(
-      "InferenceVerified",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "verifier",
+    let proof = Bytes.fromI32(1234567890);
+    let instances = [BigInt.fromI32(234)];
+    let prover = Address.fromString(
       "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "InferenceVerified",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "proof",
-      "1234567890"
-    )
-    assert.fieldEquals(
-      "InferenceVerified",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "instances",
-      "[234]"
-    )
-    assert.fieldEquals(
-      "InferenceVerified",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "prover",
-      "0x0000000000000000000000000000000000000001"
-    )
+    );
+    let verifier = Address.fromString(
+      "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let newInferenceVerifiedEvent = createInferenceVerifiedEvent(
+      verifier,
+      proof,
+      instances,
+      prover
+    );
+    handleInferenceVerified(newInferenceVerifiedEvent);
 
-    // More assert options:
-    // https://thegraph.com/docs/en/developer/matchstick/#asserts
-  })
-})
+    assert.entityCount("InferenceVerified", 1);
+    assert.bytesEquals(
+      newInferenceVerifiedEvent.params.verifier,
+      verifier,
+      "Verifier should be the same"
+    );
+    assert.bytesEquals(
+      newInferenceVerifiedEvent.params.proof,
+      proof,
+      "Proof should be the same"
+    );
+    assert.bytesEquals(
+      newInferenceVerifiedEvent.params.prover,
+      prover,
+      "Prover should be the same"
+    );
+    let array = newInferenceVerifiedEvent.params.instances;
+    // check if the array is the same
+    for (let i = 0; i < array.length; i++) {
+      assert.bigIntEquals(
+        array[i],
+        instances[i],
+        "Instances should be the same"
+      );
+    }
+  });
+});
+
+describe("Metrics Run Event", () => {
+  beforeAll(() => {
+    // before all, create a new model registered event
+    let verifier = Address.fromString(
+      "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let owner = Address.fromString(
+      "0x99995A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let newModelRegisteredEvent = createModelRegisteredEvent(verifier, owner);
+    handleModelRegistered(newModelRegisteredEvent);
+  });
+  afterAll(() => {
+    clearStore();
+  });
+
+  test("MetricsRun created and stored", () => {
+    let metrics = [BigInt.fromI32(1), BigInt.fromI32(0)];
+    let nullifier = Bytes.fromI32(1234567890);
+    let verifier = Address.fromString(
+      "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
+    );
+    let newMetricsRunEvent = createMetricsRunEvent(
+      verifier,
+      metrics,
+      nullifier
+    );
+    handleMetricsRun(newMetricsRunEvent);
+
+    assert.entityCount("MetricsRun", 1);
+    assert.bytesEquals(
+      newMetricsRunEvent.params.verifier,
+      verifier,
+      "Verifier should be the same"
+    );
+    assert.bytesEquals(
+      newMetricsRunEvent.params.nullifier,
+      nullifier,
+      "Nullifier should be the same"
+    );
+    let array = newMetricsRunEvent.params.metrics;
+    for (let i = 0; i < array.length; i++) {
+      assert.bigIntEquals(array[i], metrics[i], "Instances should be the same");
+    }
+    let modelR = ModelRegistered.load(verifier.toHexString());
+    if (modelR) {
+      for (let i = 0; i < array.length; i++) {
+        // check if the avgMetrics is the same as the metrics. avgMetrics is BigDecimal and metrics is BigInt
+        assert.stringEquals(
+          modelR!.avgMetrics![i].toString(),
+          metrics[i].toString(),
+          "AvgMetrics should be the same as metrics"
+        );
+        log.info("avgMetrics: {}", [modelR!.avgMetrics![i].toString()]);
+      }
+    } else {
+      log.error("ModelRegistered not found", []);
+    }
+    log.info("------------------------------", []);
+    metrics = [BigInt.fromI32(0), BigInt.fromI32(1)];
+    nullifier = Bytes.fromI32(1234567890);
+    verifier = Address.fromString("0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7");
+    newMetricsRunEvent = createMetricsRunEvent(verifier, metrics, nullifier);
+    handleMetricsRun(newMetricsRunEvent);
+
+    modelR = ModelRegistered.load(verifier.toHexString());
+    if (modelR) {
+      assert.stringEquals(
+        modelR!.avgMetrics![0].toString(),
+        "0.5",
+        "AvgMetrics should be the same as metrics"
+      );
+      assert.stringEquals(
+        modelR!.avgMetrics![0].toString(),
+        "0.5",
+        "AvgMetrics should be the same as metrics"
+      );
+    } else {
+      log.error("ModelRegistered not found", []);
+    }
+  });
+});

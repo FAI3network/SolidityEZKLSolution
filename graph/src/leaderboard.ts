@@ -11,6 +11,7 @@ import {
   ModelDeleted,
   ModelRegistered,
 } from "../generated/schema";
+import { log } from "matchstick-as";
 
 export function handleModelRegistered(event: ModelRegisteredEvent): void {
   let modelRegistered = ModelRegistered.load(
@@ -23,7 +24,7 @@ export function handleModelRegistered(event: ModelRegisteredEvent): void {
   }
   modelRegistered.verifier = event.params.verifier;
   modelRegistered.owner = event.params.owner;
-  modelRegistered.avgMetrics = new Array<BigDecimal>();
+  modelRegistered.avgMetrics = new Array<BigDecimal>(0);
   modelRegistered.numberOfInferences = 0;
   modelRegistered.save();
 }
@@ -65,7 +66,6 @@ export function handleInferenceVerified(event: InferenceVerifiedEvent): void {
   inferenceVerified.instances = event.params.instances;
   inferenceVerified.prover = event.params.prover;
   inferenceVerified.verifier = event.params.verifier;
-
   inferenceVerified.save();
 }
 
@@ -85,32 +85,45 @@ export function handleMetricsRun(event: MetricsRunEvent): void {
   metricsRun.metrics = event.params.metrics;
   metricsRun.verifier = event.params.verifier;
 
+  // log.info("metricsRun: {}", [metricsRun.id]);
+  // log.info("modelRegistered: {}", [modelRegistered!.id]);
+  // // log avgMetrics length
+  // log.info("avgMetrics length: {}", [
+  //   modelRegistered!.avgMetrics!.length.toString(),
+  // ]);
+
+  let newAvgMetrics = modelRegistered!.avgMetrics;
+
   if (modelRegistered!.avgMetrics!.length == 0) {
     // initialize avgMetrics
-    for (let i = 0; i < event.params.metrics.length; i++) {
-      modelRegistered!.avgMetrics!.push(
-        BigDecimal.fromString(event.params.metrics[i].toString())
-      );
-    }
+    newAvgMetrics = event.params.metrics.map<BigDecimal>((metric: BigInt) =>
+      BigDecimal.fromString(metric.toString())
+    );
+    log.info("avgMetrics initialized: {}, avgMetrics[0] = {}", [
+      newAvgMetrics.length.toString(),
+      newAvgMetrics[0].toString(),
+    ]);
   } else {
     // update avgMetrics : newAvg = (currentAvg * numInferences + newValue) / (numInferences + 1)
     let numInferences = BigDecimal.fromString(
       modelRegistered!.numberOfInferences.toString()
     );
     for (let i = 0; i < event.params.metrics.length; i++) {
-      let currentAvg = modelRegistered!.avgMetrics![i];
+      let currentAvg = newAvgMetrics![i];
       let newValue = event.params.metrics[i].toBigDecimal();
+      // log.info("numInferences: {}", [numInferences.toString()]);
 
       let newAvg = currentAvg
         .times(numInferences)
         .plus(newValue)
         .div(numInferences.plus(BigDecimal.fromString("1")));
 
-      modelRegistered!.avgMetrics![i] = newAvg;
+      log.info("newAvg[{}]: {}", [i.toString(), newAvg.toString()]);
+      newAvgMetrics![i] = newAvg;
     }
   }
+  modelRegistered!.avgMetrics = newAvgMetrics;
   modelRegistered!.numberOfInferences++;
-
   metricsRun.save();
   modelRegistered!.save();
 }

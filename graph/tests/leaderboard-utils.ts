@@ -1,11 +1,12 @@
-import { newMockEvent } from "matchstick-as"
-import { ethereum, Address, Bytes, BigInt } from "@graphprotocol/graph-ts"
+import { log, newMockEvent } from "matchstick-as";
+import { ethereum, Address, Bytes, BigInt } from "@graphprotocol/graph-ts";
 import {
   InferenceVerified,
+  Leaderboard,
   MetricsRun,
   ModelDeleted,
-  ModelRegistered
-} from "../generated/Leaderboard/Leaderboard"
+  ModelRegistered,
+} from "../generated/Leaderboard/Leaderboard";
 
 export function createInferenceVerifiedEvent(
   verifier: Address,
@@ -13,27 +14,26 @@ export function createInferenceVerifiedEvent(
   instances: Array<BigInt>,
   prover: Address
 ): InferenceVerified {
-  let inferenceVerifiedEvent = changetype<InferenceVerified>(newMockEvent())
+  let inferenceVerifiedEvent = changetype<InferenceVerified>(newMockEvent());
 
-  inferenceVerifiedEvent.parameters = new Array()
+  inferenceVerifiedEvent.parameters = new Array();
 
   inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
-  )
+  );
   inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam("proof", ethereum.Value.fromBytes(proof))
-  )
+  );
   inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam(
       "instances",
       ethereum.Value.fromUnsignedBigIntArray(instances)
     )
-  )
+  );
   inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam("prover", ethereum.Value.fromAddress(prover))
-  )
-
-  return inferenceVerifiedEvent
+  );
+  return inferenceVerifiedEvent;
 }
 
 export function createMetricsRunEvent(
@@ -41,61 +41,61 @@ export function createMetricsRunEvent(
   metrics: Array<BigInt>,
   nullifier: Bytes
 ): MetricsRun {
-  let metricsRunEvent = changetype<MetricsRun>(newMockEvent())
+  let metricsRunEvent = changetype<MetricsRun>(newMockEvent());
 
-  metricsRunEvent.parameters = new Array()
+  metricsRunEvent.parameters = new Array();
 
   metricsRunEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
-  )
+  );
   metricsRunEvent.parameters.push(
     new ethereum.EventParam(
       "metrics",
       ethereum.Value.fromUnsignedBigIntArray(metrics)
     )
-  )
+  );
   metricsRunEvent.parameters.push(
     new ethereum.EventParam(
       "nullifier",
       ethereum.Value.fromFixedBytes(nullifier)
     )
-  )
+  );
 
-  return metricsRunEvent
+  return metricsRunEvent;
 }
 
 export function createModelDeletedEvent(
   verifier: Address,
   owner: Address
 ): ModelDeleted {
-  let modelDeletedEvent = changetype<ModelDeleted>(newMockEvent())
+  let modelDeletedEvent = changetype<ModelDeleted>(newMockEvent());
 
-  modelDeletedEvent.parameters = new Array()
+  modelDeletedEvent.parameters = new Array();
 
   modelDeletedEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
-  )
+  );
   modelDeletedEvent.parameters.push(
     new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
+  );
 
-  return modelDeletedEvent
+  return modelDeletedEvent;
 }
 
 export function createModelRegisteredEvent(
   verifier: Address,
   owner: Address
 ): ModelRegistered {
-  let modelRegisteredEvent = changetype<ModelRegistered>(newMockEvent())
+  let modelRegisteredEvent = changetype<ModelRegistered>(newMockEvent());
 
-  modelRegisteredEvent.parameters = new Array()
+  modelRegisteredEvent.parameters = new Array();
 
   modelRegisteredEvent.parameters.push(
     new ethereum.EventParam("verifier", ethereum.Value.fromAddress(verifier))
-  )
+  );
   modelRegisteredEvent.parameters.push(
     new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
-  )
+  );
 
-  return modelRegisteredEvent
+  return modelRegisteredEvent;
 }
