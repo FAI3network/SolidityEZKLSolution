@@ -30,3 +30,8 @@ verify an already deployed contract:
 ```
 forge verify-contract 0x8f519D61802567794f9a2109e1A8AE2eF67D4369 "src/Leaderboard.sol:Leaderboard" --verifier-url 'https://api.routescan.io/v2/network/testnet/evm/11155111/etherscan' --etherscan-api-key $ETHERSCAN_API_KEY --num-of-optimizations 200 --compiler-version 0.8.20
 ```
+
+have to fix:
+
+- only owner should be able to registerModel -> how to verify that is a Halo2Verifier?
+- map relVariables with instances

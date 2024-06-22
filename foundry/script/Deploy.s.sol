@@ -6,26 +6,24 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 import {Leaderboard} from "../src/Leaderboard.sol";
 import {Halo2Verifier as VerifierCreditBias} from "../src/credit-bias/VerifierCreditBias.sol";
 import {Halo2Verifier as VerifierCreditUnbias} from "../src/credit-unbias/VerifierCreditUnbias.sol";
+import {Metrics} from "../src/metrics-lib/Metrics.sol";
 
 contract DeployLeaderboard is Script {
     HelperConfig internal helperConfig;
     Leaderboard public leaderboard;
+    address public metrics;
 
     function setUp() public {}
 
     function run() public returns (Leaderboard) {
         helperConfig = new HelperConfig();
         (uint256 deployerKey, ) = helperConfig.activeNetworkConfig();
-
         /* deploy leaderboard */
         vm.startBroadcast(deployerKey);
-
         console.log("Deployer: ", vm.addr(deployerKey));
-
-        leaderboard = new Leaderboard();
-
+        metrics = address(Metrics);
+        leaderboard = new Leaderboard(metrics);
         vm.stopBroadcast();
-
         return (leaderboard);
     }
 }
