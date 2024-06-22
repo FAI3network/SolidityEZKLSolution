@@ -66,6 +66,7 @@ export function handleInferenceVerified(event: InferenceVerifiedEvent): void {
   inferenceVerified.instances = event.params.instances;
   inferenceVerified.prover = event.params.prover;
   inferenceVerified.verifier = event.params.verifier;
+  inferenceVerified.relVariables = event.params.relVariables;
   inferenceVerified.save();
 }
 
@@ -112,7 +113,7 @@ export function handleMetricsRun(event: MetricsRunEvent): void {
       let currentAvg = newAvgMetrics![i];
       let newValue = event.params.metrics[i].toBigDecimal();
       // log.info("numInferences: {}", [numInferences.toString()]);
-
+      log.info("currentAvg[{}]: {}", [i.toString(), currentAvg.toString()]);
       let newAvg = currentAvg
         .times(numInferences)
         .plus(newValue)

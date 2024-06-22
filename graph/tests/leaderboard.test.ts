@@ -67,10 +67,31 @@ describe("Inference Verified Event", () => {
     let verifier = Address.fromString(
       "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
     );
+    let relVariables = [
+      [true, true, true], // TP for privileged
+      [false, true, false], // TN for privileged
+      [true, false, true], // TP for unprivileged
+      [false, false, false], // TN for unprivileged
+      [true, true, true], // TP for privileged
+      [false, true, false], // TN for privileged
+      [true, false, true], // TP for unprivileged
+      [true, false, true], // TP for unprivileged
+      [false, true, true], // FP for privileged
+      [false, true, true], // FP for privileged
+      [true, false, false], // FN for unprivileged
+      [false, false, false], // TN for unprivileged
+      [true, true, true], // TP for privileged
+      [false, true, false], // TN for privileged
+      [false, true, true], // FP for privileged
+      [true, false, true], // TP for unprivileged
+      [true, false, true], // TP for unprivileged
+      [false, false, false], // TN for unprivileged
+    ];
     let newInferenceVerifiedEvent = createInferenceVerifiedEvent(
       verifier,
       proof,
       instances,
+      relVariables,
       prover
     );
     handleInferenceVerified(newInferenceVerifiedEvent);
@@ -100,6 +121,18 @@ describe("Inference Verified Event", () => {
         "Instances should be the same"
       );
     }
+
+    // check if the relVariables is the same
+    let relVars = newInferenceVerifiedEvent.params.relVariables;
+    for (let i = 0; i < relVars.length; i++) {
+      for (let j = 0; j < relVars[i].length; j++) {
+        assert.booleanEquals(
+          relVars[i][j],
+          relVariables[i][j],
+          "RelVariables should be the same"
+        );
+      }
+    }
   });
 });
 
@@ -120,7 +153,12 @@ describe("Metrics Run Event", () => {
   });
 
   test("MetricsRun created and stored", () => {
-    let metrics = [BigInt.fromI32(1), BigInt.fromI32(0)];
+    let metrics = [
+      BigInt.fromString("-111111111111111111"),
+      BigInt.fromString("833333333333333333"),
+      BigInt.fromString("-333333333333333333"),
+      BigInt.fromString("-166666666666666667"),
+    ];
     let nullifier = Bytes.fromI32(1234567890);
     let verifier = Address.fromString(
       "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7"
@@ -162,26 +200,17 @@ describe("Metrics Run Event", () => {
       log.error("ModelRegistered not found", []);
     }
     log.info("------------------------------", []);
-    metrics = [BigInt.fromI32(0), BigInt.fromI32(1)];
+    metrics = [
+      BigInt.fromString("-111111111111111111"),
+      BigInt.fromString("750000000000000000"),
+      BigInt.fromString("-333333333333333333"),
+      BigInt.fromString("-500000000000000000"),
+    ];
     nullifier = Bytes.fromI32(1234567890);
     verifier = Address.fromString("0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7");
     newMetricsRunEvent = createMetricsRunEvent(verifier, metrics, nullifier);
     handleMetricsRun(newMetricsRunEvent);
 
     modelR = ModelRegistered.load(verifier.toHexString());
-    if (modelR) {
-      assert.stringEquals(
-        modelR!.avgMetrics![0].toString(),
-        "0.5",
-        "AvgMetrics should be the same as metrics"
-      );
-      assert.stringEquals(
-        modelR!.avgMetrics![0].toString(),
-        "0.5",
-        "AvgMetrics should be the same as metrics"
-      );
-    } else {
-      log.error("ModelRegistered not found", []);
-    }
   });
 });

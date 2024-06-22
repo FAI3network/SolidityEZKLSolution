@@ -3,13 +3,14 @@ type InferenceVerified @entity(immutable: true) {
   verifier: Bytes! # address
   proof: Bytes! # bytes
   instances: [BigInt!]! # uint256[]
+  relVariables: [[Boolean!]!]! # bool[3][]
   prover: Bytes! # address
 }
 
 type MetricsRun @entity(immutable: true) {
   id: ID!
   verifier: Bytes! # address
-  metrics: [BigInt!]! # uint256[]
+  metrics: [BigInt!]! # int256[]
   nullifier: Bytes! # bytes32
 }
 

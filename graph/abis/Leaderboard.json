@@ -1,5 +1,11 @@
 [
-  { "type": "constructor", "inputs": [], "stateMutability": "nonpayable" },
+  {
+    "type": "constructor",
+    "inputs": [
+      { "name": "_metricsLib", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "nonpayable"
+  },
   {
     "type": "function",
     "name": "deleteModel",
@@ -25,7 +31,11 @@
         "type": "address",
         "internalType": "contract IVerifier"
       },
-      { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" },
+      {
+        "name": "relVariables",
+        "type": "bool[3][]",
+        "internalType": "bool[3][]"
+      },
       { "name": "prover", "type": "address", "internalType": "address" }
     ],
     "stateMutability": "view"
@@ -44,27 +54,20 @@
   },
   {
     "type": "function",
-    "name": "inferences",
-    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "name": "getModelURI",
+    "inputs": [
+      { "name": "verifier", "type": "address", "internalType": "address" }
+    ],
     "outputs": [
-      {
-        "name": "verifier",
-        "type": "address",
-        "internalType": "contract IVerifier"
-      },
-      { "name": "prover", "type": "address", "internalType": "address" },
-      { "name": "checked", "type": "bool", "internalType": "bool" }
+      { "name": "modelURI", "type": "string", "internalType": "string" }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "models",
-    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
-    "outputs": [
-      { "name": "owner", "type": "address", "internalType": "address" },
-      { "name": "modelURI", "type": "string", "internalType": "string" }
-    ],
+    "name": "i_metricsLib",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
@@ -87,8 +90,35 @@
     "inputs": [
       { "name": "nullifier", "type": "bytes32", "internalType": "bytes32" }
     ],
-    "outputs": [],
+    "outputs": [
+      { "name": "metrics", "type": "int256[]", "internalType": "int256[]" }
+    ],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "s_inferences",
+    "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [
+      {
+        "name": "verifier",
+        "type": "address",
+        "internalType": "contract IVerifier"
+      },
+      { "name": "prover", "type": "address", "internalType": "address" },
+      { "name": "checked", "type": "bool", "internalType": "bool" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "s_models",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "modelURI", "type": "string", "internalType": "string" }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -100,7 +130,12 @@
         "internalType": "contract IVerifier"
       },
       { "name": "proof", "type": "bytes", "internalType": "bytes" },
-      { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" }
+      { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" },
+      {
+        "name": "relVariables",
+        "type": "bool[3][]",
+        "internalType": "bool[3][]"
+      }
     ],
     "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
     "stateMutability": "nonpayable"
@@ -128,6 +163,12 @@
         "internalType": "uint256[]"
       },
       {
+        "name": "relVariables",
+        "type": "bool[3][]",
+        "indexed": false,
+        "internalType": "bool[3][]"
+      },
+      {
         "name": "prover",
         "type": "address",
         "indexed": true,
@@ -148,9 +189,9 @@
       },
       {
         "name": "metrics",
-        "type": "uint256[]",
+        "type": "int256[]",
         "indexed": false,
-        "internalType": "uint256[]"
+        "internalType": "int256[]"
       },
       {
         "name": "nullifier",
