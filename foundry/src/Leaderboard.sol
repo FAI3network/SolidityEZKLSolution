@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {IVerifier} from "./IVerifier.sol";
 import {ILeaderboard} from "./ILeaderboard.sol";
+import {IMetrics} from "./metrics-lib/IMetrics.sol";
 
 contract Leaderboard is ILeaderboard {
     struct Model {
@@ -11,21 +12,25 @@ contract Leaderboard is ILeaderboard {
     }
     struct Inference {
         IVerifier verifier;
-        uint256[] instances;
+        bool[3][] relVariables; // relevant variables [[target, priviliged, predicted], ...]
         address prover;
         bool checked; // check if the inference has been used to get metrics
     }
 
     // verifier => model
-    mapping(address => Model) public models;
+    mapping(address => Model) public s_models;
     // nullifier => inference
-    mapping(bytes32 => Inference) public inferences;
+    mapping(bytes32 => Inference) public s_inferences;
 
-    constructor() {}
+    address public immutable i_metricsLib;
+
+    constructor(address _metricsLib) {
+        i_metricsLib = _metricsLib;
+    }
 
     /* Modifiers */
     modifier isNotRegistered(address verifier) {
-        Model memory model = models[verifier];
+        Model memory model = s_models[verifier];
         if (model.owner != address(0)) {
             revert ModelAlreadyRegistered();
         }
@@ -33,7 +38,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isRegistered(address verifier) {
-        Model memory model = models[verifier];
+        Model memory model = s_models[verifier];
         if (model.owner == address(0)) {
             revert ModelNotRegistered();
         }
@@ -41,7 +46,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isOwner(address verifier) {
-        Model memory model = models[verifier];
+        Model memory model = s_models[verifier];
         if (model.owner != msg.sender) {
             revert NotOwner();
         }
@@ -49,7 +54,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isNotVerified(bytes32 nullifier) {
-        Inference memory inference = inferences[nullifier];
+        Inference memory inference = s_inferences[nullifier];
         if (inference.prover != address(0)) {
             revert InferenceAlreadyVerified();
         }
@@ -57,7 +62,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier inferenceExists(bytes32 nullifier) {
-        Inference memory inference = inferences[nullifier];
+        Inference memory inference = s_inferences[nullifier];
         if (inference.prover == address(0)) {
             revert InferenceNotExists();
         }
@@ -65,7 +70,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isProver(bytes32 nullifier, address prover) {
-        Inference memory inference = inferences[nullifier];
+        Inference memory inference = s_inferences[nullifier];
         if (inference.prover != prover) {
             revert NotProver();
         }
@@ -73,7 +78,7 @@ contract Leaderboard is ILeaderboard {
     }
 
     modifier isNotChecked(bytes32 nullifier) {
-        Inference memory inference = inferences[nullifier];
+        Inference memory inference = s_inferences[nullifier];
         if (inference.checked) {
             revert InferenceAlreadyChecked();
         }
@@ -90,7 +95,7 @@ contract Leaderboard is ILeaderboard {
         if (bytes(modelURI).length == 0) {
             revert URINotProvided();
         }
-        models[address(verifier)] = Model({
+        s_models[address(verifier)] = Model({
             owner: msg.sender,
             modelURI: modelURI
         });
@@ -108,7 +113,7 @@ contract Leaderboard is ILeaderboard {
         isRegistered(address(verifier))
         isOwner(address(verifier))
     {
-        delete models[address(verifier)];
+        delete s_models[address(verifier)];
         emit ModelDeleted(verifier, msg.sender);
     }
 
@@ -118,7 +123,8 @@ contract Leaderboard is ILeaderboard {
     function verifyInference(
         IVerifier verifier,
         bytes memory proof,
-        uint256[] memory instances
+        uint256[] memory instances,
+        bool[3][] memory relVariables
     )
         external
         override
@@ -135,14 +141,20 @@ contract Leaderboard is ILeaderboard {
         if (!verifier.verifyProof(proof, instances)) {
             revert InvalidProof();
         }
-        inferences[nullifier] = Inference({
+        s_inferences[nullifier] = Inference({
             verifier: verifier,
-            instances: instances,
+            relVariables: relVariables,
             prover: msg.sender,
             checked: false
         });
 
-        emit InferenceVerified(verifier, proof, instances, msg.sender);
+        emit InferenceVerified(
+            verifier,
+            proof,
+            instances,
+            relVariables,
+            msg.sender
+        );
         return nullifier;
     }
 
@@ -157,27 +169,15 @@ contract Leaderboard is ILeaderboard {
         inferenceExists(nullifier)
         isProver(nullifier, msg.sender)
         isNotChecked(nullifier)
+        returns (int256[] memory metrics)
     {
-        inferences[nullifier].checked = true;
-        Inference memory inference = inferences[nullifier];
+        s_inferences[nullifier].checked = true;
+        Inference memory inference = s_inferences[nullifier];
         // run metrics
-        uint256[] memory metrics = runMetrics(inference.instances);
+        IMetrics metricsLib = IMetrics(i_metricsLib);
+        metrics = metricsLib.runMetrics(inference.relVariables);
 
         emit MetricsRun(inference.verifier, metrics, nullifier);
-    }
-
-    /**
-     * @dev internal function to run metrics on an inference
-     * @param instances output instances
-     * @return metrics metrics of the inference
-     */
-    function runMetrics(
-        uint256[] memory instances
-    ) internal returns (uint256[] memory) {
-        uint256[] memory metrics = new uint256[](3);
-        metrics[0] = uint256(1);
-        metrics[1] = uint256(1);
-        metrics[2] = uint256(1);
         return metrics;
     }
 
@@ -187,8 +187,18 @@ contract Leaderboard is ILeaderboard {
     function getModel(
         address verifier
     ) external view override returns (address owner, string memory modelURI) {
-        Model memory model = models[verifier];
+        Model memory model = s_models[verifier];
         return (model.owner, model.modelURI);
+    }
+
+    /**
+     * @dev See {ILeaderboard-getModelURI}
+     */
+    function getModelURI(
+        address verifier
+    ) external view returns (string memory modelURI) {
+        Model memory model = s_models[verifier];
+        return (model.modelURI);
     }
 
     /**
@@ -200,9 +210,13 @@ contract Leaderboard is ILeaderboard {
         external
         view
         override
-        returns (IVerifier verifier, uint256[] memory instances, address prover)
+        returns (
+            IVerifier verifier,
+            bool[3][] memory relVariables,
+            address prover
+        )
     {
-        Inference memory inference = inferences[nullifier];
-        return (inference.verifier, inference.instances, inference.prover);
+        Inference memory inference = s_inferences[nullifier];
+        return (inference.verifier, inference.relVariables, inference.prover);
     }
 }

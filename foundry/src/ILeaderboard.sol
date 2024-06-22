@@ -22,11 +22,12 @@ interface ILeaderboard {
         IVerifier indexed verifier,
         bytes indexed proof,
         uint256[] instances,
+        bool[3][] relVariables,
         address indexed prover
     );
     event MetricsRun(
         IVerifier indexed verifier,
-        uint256[] metrics,
+        int256[] metrics,
         bytes32 indexed nullifier
     );
 
@@ -54,7 +55,8 @@ interface ILeaderboard {
     function verifyInference(
         IVerifier verifier,
         bytes memory proof,
-        uint256[] memory instances
+        uint256[] memory instances,
+        bool[3][] memory relVariables
     ) external returns (bytes32 nullifier);
 
     /**
@@ -62,7 +64,9 @@ interface ILeaderboard {
      * @param nullifier nullifier of the inference
      * @notice The inference must not have been checked before
      */
-    function runFairness(bytes32 nullifier) external;
+    function runFairness(
+        bytes32 nullifier
+    ) external returns (int256[] memory metrics);
 
     /**
      * @dev Get the model information
@@ -75,10 +79,19 @@ interface ILeaderboard {
     ) external view returns (address owner, string memory modelURI);
 
     /**
+     * @dev Get the model URI
+     * @param verifier address of verifier contract
+     * @return modelURI model URI
+     */
+    function getModelURI(
+        address verifier
+    ) external view returns (string memory modelURI);
+
+    /**
      * @dev Get the inference information
      * @param nullifier nullifier of the inference
      * @return verifier contract verifier of the inference
-     * @return instances output instances
+     * @return relVariables relevant variables of the inference
      * @return prover prover of the inference
      */
     function getInference(
@@ -88,7 +101,7 @@ interface ILeaderboard {
         view
         returns (
             IVerifier verifier,
-            uint256[] memory instances,
+            bool[3][] memory relVariables,
             address prover
         );
 }
