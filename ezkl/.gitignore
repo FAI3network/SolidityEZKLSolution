@@ -5,3 +5,8 @@ credit-bias/kzg.srs
 credit-unbias/pk.key
 credit-unbias/vk.key
 credit-unbias/kzg.srs
+
+aggr-credit-bias/aggregate_pk.key
+aggr-credit-bias/aggregate_vk.key
+aggr-credit-bias/pk.key
+aggr-credit-bias/vk.key
