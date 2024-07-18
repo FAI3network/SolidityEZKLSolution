@@ -142,51 +142,56 @@ library Metrics {
     }
 
     function runMetrics(
-        uint256 pTP,
-        uint256 pFP,
-        uint256 pTN,
-        uint256 pFN,
-        uint256 uTP,
-        uint256 uFP,
-        uint256 uTN,
-        uint256 uFN
+        bool[3][] memory history
     ) public pure returns (int[] memory metrics) {
+        require(history.length > 0, "No data provided");
+        (
+            Counter memory privileged,
+            Counter memory unprivileged
+        ) = initializeCounter(history);
         require(
-            (pTP + pFP + pTN + pFN) > 0 && (uTP + uFP + uTN + uFN) > 0,
+            privileged.count > 0 && unprivileged.count > 0,
             "No data for one of the groups"
         );
         require(
-            (pTP + pFN) > 0 && (uTP + uFN) > 0,
+            (privileged.tP + privileged.fN) > 0 &&
+                (unprivileged.tP + unprivileged.fN) > 0,
             "No positive cases for one of the groups"
         );
         require(
-            (pFP + pTN) > 0 && (uFP + uTN) > 0,
+            (privileged.fP + privileged.tN) > 0 &&
+                (unprivileged.fP + unprivileged.tN) > 0,
             "No negative cases for one of the groups"
         );
         metrics = new int[](4);
         metrics[0] = statisticalParityDifference(
-            (pTP + pFP + pTN + pFN),
-            (uTP + uFP + uTN + uFN),
-            (pTP + pFP),
-            (uTP + uFP)
+            privileged.count,
+            unprivileged.count,
+            privileged.positiveCount,
+            unprivileged.positiveCount
         );
         metrics[1] = disparateImpact(
-            (pTP + pFP + pTN + pFN),
-            (uTP + uFP + uTN + uFN),
-            (pTP + pFP),
-            (uTP + uFP)
+            privileged.count,
+            unprivileged.count,
+            privileged.positiveCount,
+            unprivileged.positiveCount
         );
         metrics[2] = averageOddsDifference(
-            pTP,
-            pFP,
-            pTN,
-            pFN,
-            uTP,
-            uFP,
-            uTN,
-            uFN
+            privileged.tP,
+            privileged.fP,
+            privileged.tN,
+            privileged.fN,
+            unprivileged.tP,
+            unprivileged.fP,
+            unprivileged.tN,
+            unprivileged.fN
         );
-        metrics[3] = equalOpportunityDifference(pTP, pFN, uTP, uFN);
+        metrics[3] = equalOpportunityDifference(
+            privileged.tP,
+            privileged.fN,
+            unprivileged.tP,
+            unprivileged.fN
+        );
         return metrics;
     }
 }

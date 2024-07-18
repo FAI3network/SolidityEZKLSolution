@@ -14,29 +14,37 @@ interface ILeaderboard {
     error InferenceAlreadyChecked();
     error InferenceNotExists();
     error URINotProvided();
+    error InvalidLength();
 
     /* Events */
-    event ModelRegistered(IVerifier indexed verifier, address indexed owner);
+    event ModelRegistered(
+        IVerifier indexed verifier,
+        address indexed owner,
+        string modelURI
+    );
     event ModelDeleted(IVerifier indexed verifier, address indexed owner);
     event InferenceVerified(
         IVerifier indexed verifier,
         bytes indexed proof,
         uint256[] instances,
-        bool[3][] relVariables,
         address indexed prover
     );
-    event MetricsRun(
-        IVerifier indexed verifier,
-        int256[] metrics,
-        bytes32 indexed nullifier
-    );
+    event MetricsRun(address indexed verifier, int256[] metrics);
 
     /**
      * @dev Register a new model
      * @param verifier: verifier contract, used as identifier for the model
+     * @param modelURI: URI of the model (link)
+     * @param priviligedIndex: index of the priviliged variable (input)
+     * @param predictedIndex: index of the predicted variable (output)
      * @dev Emits a {ModelRegistered} event
      */
-    function registerModel(IVerifier verifier, string memory) external;
+    function registerModel(
+        IVerifier verifier,
+        string memory modelURI,
+        uint256 priviligedIndex,
+        uint256 predictedIndex
+    ) external;
 
     /**
      * @dev Delete a model
@@ -49,6 +57,8 @@ interface ILeaderboard {
      * @param verifier verifier contract
      * @param proof proof of the inference
      * @param instances output instances
+     * @param target target value
+     * @param privId priviliged variable index
      * @notice The nullifier is a unique identifier for the inference and is used to check if the inference has been run
      * @return nullifier nullifier of the inference
      */
@@ -56,16 +66,17 @@ interface ILeaderboard {
         IVerifier verifier,
         bytes memory proof,
         uint256[] memory instances,
-        bool[3][] memory relVariables
+        uint256 target,
+        uint256 privId
     ) external returns (bytes32 nullifier);
 
     /**
      * @dev Run fairness metrics on an inference
-     * @param nullifier nullifier of the inference
-     * @notice The inference must not have been checked before
+     * @param verifier verifier contract
+     * @notice The model must be registered before running metrics
      */
     function runFairness(
-        bytes32 nullifier
+        IVerifier verifier
     ) external returns (int256[] memory metrics);
 
     /**
@@ -86,22 +97,4 @@ interface ILeaderboard {
     function getModelURI(
         address verifier
     ) external view returns (string memory modelURI);
-
-    /**
-     * @dev Get the inference information
-     * @param nullifier nullifier of the inference
-     * @return verifier contract verifier of the inference
-     * @return relVariables relevant variables of the inference
-     * @return prover prover of the inference
-     */
-    function getInference(
-        bytes32 nullifier
-    )
-        external
-        view
-        returns (
-            IVerifier verifier,
-            bool[3][] memory relVariables,
-            address prover
-        );
 }

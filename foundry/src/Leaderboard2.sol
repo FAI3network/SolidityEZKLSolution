@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import {IVerifier} from "./IVerifier.sol";
 import {ILeaderboard} from "./ILeaderboard.sol";
-import {IMetrics} from "./metrics-lib/IMetrics.sol";
+import {IMetrics} from "./metrics-lib/IMetrics2.sol";
 
-contract Leaderboard is ILeaderboard {
+contract Leaderboard2 is ILeaderboard {
     struct ConvMatrix {
         uint256 tP;
         uint256 fP;
@@ -18,8 +18,7 @@ contract Leaderboard is ILeaderboard {
         string modelURI;
         uint256 priviligedIndex;
         uint256 predictedIndex;
-        ConvMatrix priviligedData;
-        ConvMatrix unpriviligedData;
+        bool[3][] history; // history of inferences [[target, priviliged, predicted], ...]
     }
 
     // verifier => model
@@ -88,8 +87,7 @@ contract Leaderboard is ILeaderboard {
             modelURI: modelURI,
             priviligedIndex: priviligedIndex,
             predictedIndex: predictedIndex,
-            priviligedData: ConvMatrix(0, 0, 0, 0),
-            unpriviligedData: ConvMatrix(0, 0, 0, 0)
+            history: new bool[3][](0)
         });
         emit ModelRegistered(verifier, msg.sender, modelURI);
     }
@@ -139,35 +137,13 @@ contract Leaderboard is ILeaderboard {
 
         uint256 predIndex = s_models[address(verifier)].predictedIndex;
         uint256 privIndex = s_models[address(verifier)].priviligedIndex;
-        if (instances[privIndex] == privId) {
-            if (instances[predIndex] == 1) {
-                if (target == 1) {
-                    s_models[address(verifier)].priviligedData.tP++;
-                } else {
-                    s_models[address(verifier)].priviligedData.fP++;
-                }
-            } else {
-                if (target == 1) {
-                    s_models[address(verifier)].priviligedData.fN++;
-                } else {
-                    s_models[address(verifier)].priviligedData.tN++;
-                }
-            }
-        } else {
-            if (instances[predIndex] == 1) {
-                if (target == 1) {
-                    s_models[address(verifier)].unpriviligedData.tP++;
-                } else {
-                    s_models[address(verifier)].unpriviligedData.fP++;
-                }
-            } else {
-                if (target == 1) {
-                    s_models[address(verifier)].unpriviligedData.fN++;
-                } else {
-                    s_models[address(verifier)].unpriviligedData.tN++;
-                }
-            }
-        }
+        s_models[address(verifier)].history.push(
+            [
+                target == 1,
+                instances[privIndex] == privId,
+                instances[predIndex] == 1
+            ]
+        );
 
         emit InferenceVerified(verifier, proof, instances, msg.sender);
         return nullifier;
@@ -187,16 +163,7 @@ contract Leaderboard is ILeaderboard {
         Model memory model = s_models[address(verifier)];
 
         // run metrics
-        metrics = IMetrics(i_metricsLib).runMetrics(
-            model.priviligedData.tP,
-            model.priviligedData.fP,
-            model.priviligedData.tN,
-            model.priviligedData.fN,
-            model.unpriviligedData.tP,
-            model.unpriviligedData.fP,
-            model.unpriviligedData.tN,
-            model.unpriviligedData.fN
-        );
+        metrics = IMetrics(i_metricsLib).runMetrics(model.history);
 
         emit MetricsRun(address(verifier), metrics);
         return metrics;
