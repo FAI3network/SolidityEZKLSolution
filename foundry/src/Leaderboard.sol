@@ -212,6 +212,28 @@ contract Leaderboard is ILeaderboard {
         return (model.owner, model.modelURI);
     }
 
+    function getPriviligedData(
+        address verifier
+    ) external view returns (uint tP, uint fP, uint tN, uint fN) {
+        return (
+            s_models[verifier].priviligedData.tP,
+            s_models[verifier].priviligedData.fP,
+            s_models[verifier].priviligedData.tN,
+            s_models[verifier].priviligedData.fN
+        );
+    }
+
+    function getUnpriviligedData(
+        address verifier
+    ) external view returns (uint tP, uint fP, uint tN, uint fN) {
+        return (
+            s_models[verifier].unpriviligedData.tP,
+            s_models[verifier].unpriviligedData.fP,
+            s_models[verifier].unpriviligedData.tN,
+            s_models[verifier].unpriviligedData.fN
+        );
+    }
+
     /**
      * @dev See {ILeaderboard-getModelURI}
      */
