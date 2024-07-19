@@ -670,43 +670,48 @@ contract leaderboardTest is Test {
         return nullifier;
     }
 
-    // function test_verifyMultipleInferences() public {
-    //     this.test_registerModel();
+    function test_verifyMultipleInferences()
+        public
+        returns (uint, uint, uint, uint, uint, uint, uint, uint)
+    {
+        this.test_registerModel();
 
-    //     for (uint i = 0; i < I_PROOFS.length; i++) {
-    //         bytes memory proof;
-    //         uint256[] memory instances;
-    //         (proof, instances) = utils.setParams(I_PROOFS[i], I_INSTS[i]); // set params
+        for (uint i = 0; i < I_PROOFS.length; i++) {
+            bytes memory proof;
+            uint256[] memory instances;
+            (proof, instances) = utils.setParams(I_PROOFS[i], I_INSTS[i]); // set params
 
-    //         bytes32 nullifier = keccak256(
-    //             abi.encodePacked(address(verifier), proof, instances)
-    //         );
-    //         vm.expectEmit();
-    //         emit InferenceVerified(verifier, proof, instances, address(this));
-    //         bytes32 res = lb.verifyInference(
-    //             verifier,
-    //             proof,
-    //             instances,
-    //             TARGETS[i],
-    //             4096
-    //         ); // verify inference
+            bytes32 nullifier = keccak256(
+                abi.encodePacked(address(verifier), proof, instances)
+            );
+            vm.expectEmit();
+            emit InferenceVerified(verifier, proof, instances, address(this));
+            bytes32 res = lb.verifyInference(
+                verifier,
+                proof,
+                instances,
+                TARGETS[i],
+                4096
+            ); // verify inference
 
-    //         // console.logBytes32(nullifier);
-    //         assertTrue(nullifier == res);
+            // console.logBytes32(nullifier);
+            assertTrue(nullifier == res);
 
-    //         // console.log(1, instances[PRIV_INDEX], instances[PRED_INDEX]);
-    //     }
+            // console.log(1, instances[PRIV_INDEX], instances[PRED_INDEX]);
+        }
 
-    //     (uint utP, uint ufP, uint utN, uint ufN) = lb.getUnpriviligedData(
-    //         address(verifier)
-    //     );
-    //     (uint ptP, uint pfP, uint ptN, uint pfN) = lb.getPriviligedData(
-    //         address(verifier)
-    //     );
+        (uint utP, uint ufP, uint utN, uint ufN) = lb.getUnpriviligedData(
+            address(verifier)
+        );
+        (uint ptP, uint pfP, uint ptN, uint pfN) = lb.getPriviligedData(
+            address(verifier)
+        );
 
-    //     console.log(ptP, pfP, ptN, pfN);
-    //     console.log(utP, ufP, utN, ufN);
-    // }
+        // console.log(ptP, pfP, ptN, pfN);
+        // console.log(utP, ufP, utN, ufN);
+
+        return (ptP, pfP, ptN, pfN, utP, ufP, utN, ufN);
+    }
 
     function test_verifyModelNotRegistered() public {
         bytes memory proof;
@@ -747,44 +752,26 @@ contract leaderboardTest is Test {
         lb.verifyInference(verifier, proof, instances, TARGETS[0], 4096); // verify inference
     }
 
-    // /* Test runFairness */
-    // function test_runFairness() public returns (bytes32) {
-    //     bytes32 nullifier = this.test_verifyInference();
-    //     int256[] memory metrics;
+    /* Test runFairness */
+    function test_runFairness() public {
+        (
+            uint ptP,
+            uint pfP,
+            uint ptN,
+            uint pfN,
+            uint utP,
+            uint ufP,
+            uint utN,
+            uint ufN
+        ) = this.test_verifyMultipleInferences();
+        int256[] memory metrics;
 
-    //     metrics = Metrics.runMetrics(I_VARS);
-    //     vm.expectEmit();
-    //     emit MetricsRun(verifier, metrics, nullifier);
-    //     lb.runFairness(nullifier);
-
-    //     return nullifier;
-    // }
-
-    // function test_alreadyChecked() public {
-    //     bytes32 nullifier = this.test_runFairness();
-    //     vm.expectRevert(
-    //         abi.encodeWithSelector(InferenceAlreadyChecked.selector)
-    //     );
-    //     lb.runFairness(nullifier);
-    // }
-
-    // function test_isNotProver() public {
-    //     bytes32 nullifier = this.test_verifyInference();
-    //     vm.startPrank(makeAddr("random"));
-    //     vm.expectRevert(abi.encodeWithSelector(NotProver.selector));
-    //     lb.runFairness(nullifier);
-    //     vm.stopPrank();
-    // }
-
-    // function test_inferenceExists() public {
-    //     bytes memory proof;
-    //     uint256[] memory instances;
-    //     (proof, instances) = utils.setParams(I_PROOF, I_INST); // set params
-
-    //     bytes32 nullifier = keccak256(
-    //         abi.encodePacked(makeAddr("random"), proof, instances)
-    //     );
-    //     vm.expectRevert(abi.encodeWithSelector(InferenceNotExists.selector));
-    //     lb.runFairness(nullifier);
-    // }
+        metrics = Metrics.runMetrics(ptP, pfP, ptN, pfN, utP, ufP, utN, ufN);
+        vm.expectEmit();
+        emit MetricsRun(address(verifier), metrics);
+        lb.runFairness(verifier);
+        for (uint i = 0; i < metrics.length; i++) {
+            console.logInt(metrics[i]);
+        }
+    }
 }
