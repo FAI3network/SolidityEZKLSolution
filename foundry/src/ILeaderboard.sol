@@ -57,7 +57,7 @@ interface ILeaderboard {
      * @param verifier verifier contract
      * @param proof proof of the inference
      * @param instances output instances
-     * @param target target value
+     * @param target target value (expected output)
      * @param privId priviliged variable index
      * @notice The nullifier is a unique identifier for the inference and is used to check if the inference has been run
      * @return nullifier nullifier of the inference
@@ -74,6 +74,7 @@ interface ILeaderboard {
      * @dev Run fairness metrics on an inference
      * @param verifier verifier contract
      * @notice The model must be registered before running metrics
+     * @return metrics fairness metrics (1e18)
      */
     function runFairness(
         IVerifier verifier
@@ -97,4 +98,20 @@ interface ILeaderboard {
     function getModelURI(
         address verifier
     ) external view returns (string memory modelURI);
+
+    /**
+     * @dev Get Convolution Matrix of the priviliged group
+     * @param verifier address of verifier contract
+     */
+    function getPriviligedData(
+        address verifier
+    ) external view returns (uint tP, uint fP, uint tN, uint fN);
+
+    /**
+     * @dev Get Convolution Matrix of the unpriviliged group
+     * @param verifier address of verifier contract
+     */
+    function getUnpriviligedData(
+        address verifier
+    ) external view returns (uint tP, uint fP, uint tN, uint fN);
 }

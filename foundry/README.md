@@ -34,4 +34,4 @@ forge verify-contract 0x8f519D61802567794f9a2109e1A8AE2eF67D4369 "src/Leaderboar
 have to fix:
 
 - only owner should be able to registerModel -> how to verify that is a Halo2Verifier?
-- map relVariables with instances
+- user should not be able to manipulate target values.

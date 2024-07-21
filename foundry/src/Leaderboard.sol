@@ -203,15 +203,8 @@ contract Leaderboard is ILeaderboard {
     }
 
     /**
-     * @dev See {ILeaderboard-getModel}
+     * @dev See {ILeaderboard-getPriviligedData}
      */
-    function getModel(
-        address verifier
-    ) external view override returns (address owner, string memory modelURI) {
-        Model memory model = s_models[verifier];
-        return (model.owner, model.modelURI);
-    }
-
     function getPriviligedData(
         address verifier
     ) external view returns (uint tP, uint fP, uint tN, uint fN) {
@@ -223,6 +216,9 @@ contract Leaderboard is ILeaderboard {
         );
     }
 
+    /**
+     * @dev See {ILeaderboard-getUnpriviligedData}
+     */
     function getUnpriviligedData(
         address verifier
     ) external view returns (uint tP, uint fP, uint tN, uint fN) {
@@ -232,6 +228,16 @@ contract Leaderboard is ILeaderboard {
             s_models[verifier].unpriviligedData.tN,
             s_models[verifier].unpriviligedData.fN
         );
+    }
+
+    /**
+     * @dev See {ILeaderboard-getModel}
+     */
+    function getModel(
+        address verifier
+    ) external view override returns (address owner, string memory modelURI) {
+        Model memory model = s_models[verifier];
+        return (model.owner, model.modelURI);
     }
 
     /**
