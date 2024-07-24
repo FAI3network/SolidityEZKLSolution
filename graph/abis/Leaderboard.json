@@ -21,27 +21,6 @@
   },
   {
     "type": "function",
-    "name": "getInference",
-    "inputs": [
-      { "name": "nullifier", "type": "bytes32", "internalType": "bytes32" }
-    ],
-    "outputs": [
-      {
-        "name": "verifier",
-        "type": "address",
-        "internalType": "contract IVerifier"
-      },
-      {
-        "name": "relVariables",
-        "type": "bool[3][]",
-        "internalType": "bool[3][]"
-      },
-      { "name": "prover", "type": "address", "internalType": "address" }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "getModel",
     "inputs": [
       { "name": "verifier", "type": "address", "internalType": "address" }
@@ -65,6 +44,34 @@
   },
   {
     "type": "function",
+    "name": "getPriviligedData",
+    "inputs": [
+      { "name": "verifier", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [
+      { "name": "tP", "type": "uint256", "internalType": "uint256" },
+      { "name": "fP", "type": "uint256", "internalType": "uint256" },
+      { "name": "tN", "type": "uint256", "internalType": "uint256" },
+      { "name": "fN", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getUnpriviligedData",
+    "inputs": [
+      { "name": "verifier", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [
+      { "name": "tP", "type": "uint256", "internalType": "uint256" },
+      { "name": "fP", "type": "uint256", "internalType": "uint256" },
+      { "name": "tN", "type": "uint256", "internalType": "uint256" },
+      { "name": "fN", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "i_metricsLib",
     "inputs": [],
     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
@@ -79,7 +86,13 @@
         "type": "address",
         "internalType": "contract IVerifier"
       },
-      { "name": "modelURI", "type": "string", "internalType": "string" }
+      { "name": "modelURI", "type": "string", "internalType": "string" },
+      {
+        "name": "priviligedIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      { "name": "predictedIndex", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -88,7 +101,11 @@
     "type": "function",
     "name": "runFairness",
     "inputs": [
-      { "name": "nullifier", "type": "bytes32", "internalType": "bytes32" }
+      {
+        "name": "verifier",
+        "type": "address",
+        "internalType": "contract IVerifier"
+      }
     ],
     "outputs": [
       { "name": "metrics", "type": "int256[]", "internalType": "int256[]" }
@@ -99,15 +116,7 @@
     "type": "function",
     "name": "s_inferences",
     "inputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
-    "outputs": [
-      {
-        "name": "verifier",
-        "type": "address",
-        "internalType": "contract IVerifier"
-      },
-      { "name": "prover", "type": "address", "internalType": "address" },
-      { "name": "checked", "type": "bool", "internalType": "bool" }
-    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
     "stateMutability": "view"
   },
   {
@@ -116,7 +125,39 @@
     "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "outputs": [
       { "name": "owner", "type": "address", "internalType": "address" },
-      { "name": "modelURI", "type": "string", "internalType": "string" }
+      { "name": "modelURI", "type": "string", "internalType": "string" },
+      {
+        "name": "priviligedIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "predictedIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "priviligedData",
+        "type": "tuple",
+        "internalType": "struct Leaderboard.ConvMatrix",
+        "components": [
+          { "name": "tP", "type": "uint256", "internalType": "uint256" },
+          { "name": "fP", "type": "uint256", "internalType": "uint256" },
+          { "name": "tN", "type": "uint256", "internalType": "uint256" },
+          { "name": "fN", "type": "uint256", "internalType": "uint256" }
+        ]
+      },
+      {
+        "name": "unpriviligedData",
+        "type": "tuple",
+        "internalType": "struct Leaderboard.ConvMatrix",
+        "components": [
+          { "name": "tP", "type": "uint256", "internalType": "uint256" },
+          { "name": "fP", "type": "uint256", "internalType": "uint256" },
+          { "name": "tN", "type": "uint256", "internalType": "uint256" },
+          { "name": "fN", "type": "uint256", "internalType": "uint256" }
+        ]
+      }
     ],
     "stateMutability": "view"
   },
@@ -131,11 +172,8 @@
       },
       { "name": "proof", "type": "bytes", "internalType": "bytes" },
       { "name": "instances", "type": "uint256[]", "internalType": "uint256[]" },
-      {
-        "name": "relVariables",
-        "type": "bool[3][]",
-        "internalType": "bool[3][]"
-      }
+      { "name": "target", "type": "uint256", "internalType": "uint256" },
+      { "name": "privId", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
     "stateMutability": "nonpayable"
@@ -163,12 +201,6 @@
         "internalType": "uint256[]"
       },
       {
-        "name": "relVariables",
-        "type": "bool[3][]",
-        "indexed": false,
-        "internalType": "bool[3][]"
-      },
-      {
         "name": "prover",
         "type": "address",
         "indexed": true,
@@ -185,19 +217,13 @@
         "name": "verifier",
         "type": "address",
         "indexed": true,
-        "internalType": "contract IVerifier"
+        "internalType": "address"
       },
       {
         "name": "metrics",
         "type": "int256[]",
         "indexed": false,
         "internalType": "int256[]"
-      },
-      {
-        "name": "nullifier",
-        "type": "bytes32",
-        "indexed": true,
-        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -236,6 +262,12 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      },
+      {
+        "name": "modelURI",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
       }
     ],
     "anonymous": false
@@ -243,6 +275,7 @@
   { "type": "error", "name": "InferenceAlreadyChecked", "inputs": [] },
   { "type": "error", "name": "InferenceAlreadyVerified", "inputs": [] },
   { "type": "error", "name": "InferenceNotExists", "inputs": [] },
+  { "type": "error", "name": "InvalidLength", "inputs": [] },
   { "type": "error", "name": "InvalidProof", "inputs": [] },
   { "type": "error", "name": "ModelAlreadyRegistered", "inputs": [] },
   { "type": "error", "name": "ModelNotRegistered", "inputs": [] },

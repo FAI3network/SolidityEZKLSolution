@@ -1,8 +1,8 @@
 {
   "sepolia": {
     "Leaderboard": {
-      "address": "0xC66dD41549212FC6f3b8eFbc8eAF7Df652cfB6e2",
-      "startBlock": 6163002
+      "address": "0x51395Fd32809D0280d1422344369518AB876b292",
+      "startBlock": 6352787
     }
   }
 }

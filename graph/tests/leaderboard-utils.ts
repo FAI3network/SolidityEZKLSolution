@@ -11,7 +11,6 @@ export function createInferenceVerifiedEvent(
   verifier: Address,
   proof: Bytes,
   instances: Array<BigInt>,
-  relVariables: Array<Array<boolean>>,
   prover: Address
 ): InferenceVerified {
   let inferenceVerifiedEvent = changetype<InferenceVerified>(newMockEvent())
@@ -31,12 +30,6 @@ export function createInferenceVerifiedEvent(
     )
   )
   inferenceVerifiedEvent.parameters.push(
-    new ethereum.EventParam(
-      "relVariables",
-      ethereum.Value.fromBooleanMatrix(relVariables)
-    )
-  )
-  inferenceVerifiedEvent.parameters.push(
     new ethereum.EventParam("prover", ethereum.Value.fromAddress(prover))
   )
 
@@ -45,8 +38,7 @@ export function createInferenceVerifiedEvent(
 
 export function createMetricsRunEvent(
   verifier: Address,
-  metrics: Array<BigInt>,
-  nullifier: Bytes
+  metrics: Array<BigInt>
 ): MetricsRun {
   let metricsRunEvent = changetype<MetricsRun>(newMockEvent())
 
@@ -59,12 +51,6 @@ export function createMetricsRunEvent(
     new ethereum.EventParam(
       "metrics",
       ethereum.Value.fromSignedBigIntArray(metrics)
-    )
-  )
-  metricsRunEvent.parameters.push(
-    new ethereum.EventParam(
-      "nullifier",
-      ethereum.Value.fromFixedBytes(nullifier)
     )
   )
 
@@ -91,7 +77,8 @@ export function createModelDeletedEvent(
 
 export function createModelRegisteredEvent(
   verifier: Address,
-  owner: Address
+  owner: Address,
+  modelURI: string
 ): ModelRegistered {
   let modelRegisteredEvent = changetype<ModelRegistered>(newMockEvent())
 
@@ -102,6 +89,9 @@ export function createModelRegisteredEvent(
   )
   modelRegisteredEvent.parameters.push(
     new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
+  )
+  modelRegisteredEvent.parameters.push(
+    new ethereum.EventParam("modelURI", ethereum.Value.fromString(modelURI))
   )
 
   return modelRegisteredEvent
